@@ -1,0 +1,6 @@
+module Pods_IlusCinema_IlusCinemaTests {
+  umbrella header "Pods-IlusCinema-IlusCinemaTests-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,0 +1,6 @@
+module Pods_IlusCinema {
+  umbrella header "Pods-IlusCinema-umbrella.h"
+
+  export *
+  module * { export * }
+}
