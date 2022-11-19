@@ -10,7 +10,8 @@ import {
     LOGIN_FAIL,
     LOG_OUT,
     LOGIN_URL,
-    TOKEN_LOGIN_URL
+    TOKEN_LOGIN_URL,
+    TOKEN_FAIL
 } from "../constants";
 
 import API from '../api';
@@ -60,7 +61,7 @@ const login = () => {
  * @constructor
  */
 export const loginResponse = (response) => {
-    apiToken(response?.data?.token);
+    apiToken(response?.token);
     return {
         type: response.status? LOGIN_SUCCESS: LOGIN_FAIL,
         data: response,
@@ -69,6 +70,21 @@ export const loginResponse = (response) => {
 };
 
 
+/**
+ * Log in response action creator that returns a LOGIN_FAIL or LOGIN_SUCCESS ACTION
+ *
+ * @param response
+ * @returns {{data: *, type: *}}
+ * @constructor
+ */
+export const tokenResponse = (response) => {
+    return {
+        type: response.status? LOGIN_SUCCESS: TOKEN_FAIL,
+        data: response,
+        error: response.error
+    }
+};
+
 //============================= TOKEN LOGIN =============================//
 /**
  * Initiate ToKen Log in action creator
@@ -76,13 +92,11 @@ export const loginResponse = (response) => {
  * @returns {{data: *, type: *}}
  * @constructor
  */
-export const initTokenLogin = (token) => {
+export const initTokenLogin = () => {
     return function (dispatch) {
 
-        dispatch(login());
-
-        API.post(LOGIN_URL, {token}).then((response) => {
-            dispatch(loginResponse(response));
+        API.get(TOKEN_LOGIN_URL).then((response) => {
+            dispatch(tokenResponse(response));
         }).catch((error) => {
             console.log(error);
         })

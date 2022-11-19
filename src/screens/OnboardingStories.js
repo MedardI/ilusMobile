@@ -3,6 +3,9 @@ import { View, Text, SafeAreaView, StatusBar } from 'react-native';
 import AppIntroSlider from 'react-native-app-intro-slider';
 import { colors, scale, scaleFont, verticalScale, constants } from '../utils';
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import {bindActionCreators} from "redux";
+import {initTokenLogin as initTokenLoginCreator} from "../actions/login";
+import {connect} from "react-redux";
 
 
 const slides = [
@@ -32,8 +35,6 @@ const slides = [
 
 const OnboardingStories = (props) => {
 
-    const [showRealApp, setshowRealApp] = useState(false);
-
     const renderItem = ({ item }) => {
         return (
             <View style={{ flex: 1, backgroundColor: colors.black }}>
@@ -53,7 +54,6 @@ const OnboardingStories = (props) => {
                     <Text style={{ color: colors.green, fontSize: scaleFont(24), fontFamily: constants.OPENSANS_FONT_BOLD, alignSelf: "center", marginTop: verticalScale(10) }}>{item.title}</Text>
                     <Text style={{ color: colors.white, fontSize: scaleFont(14), width: scale(260), alignSelf: 'center', fontFamily: constants.OPENSANS_FONT_MEDIUM, textAlign: 'center', marginTop: verticalScale(10) }}>{item.text}</Text>
 
-
                 </View>
             </View>
         );
@@ -62,9 +62,12 @@ const OnboardingStories = (props) => {
     const onDone = () => {
         // User finished the introduction. Show real app through
         // navigation or simply by controlling state
+        if (props.auth.loggedIn){
+            props.navigation.navigate("BottomTab");
+        } else {
+            props.navigation.navigate("LoginScreen");
+        }
 
-        props.navigation.navigate("LoginScreen");
-        setshowRealApp(true)
     };
 
 
@@ -76,7 +79,7 @@ const OnboardingStories = (props) => {
         dotStyle={{ backgroundColor: "white" }}
         activeDotStyle={{ backgroundColor: "green" }}
         showSkipButton={true}
-        onSkip={() => props.navigation.navigate("LoginScreen")}
+        onSkip={() => onDone()}
         skipLabel="Connexion"
         doneLabel="Fini"
         nextLabel="Suivant"
@@ -85,5 +88,14 @@ const OnboardingStories = (props) => {
 
 };
 
-export default OnboardingStories;
+const mapDispatchToProps = dispatch =>
+    bindActionCreators({initTokenLoginCreator}, dispatch);
+
+const mapStateToProps = (state)  => {
+    return {
+        auth: state.auth,
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(OnboardingStories);
 

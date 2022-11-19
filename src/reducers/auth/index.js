@@ -1,8 +1,8 @@
 import {
-    LOGIN,
-    LOGIN_FAIL,
-    LOGIN_SUCCESS,
-    LOG_OUT,
+  LOGIN,
+  LOGIN_FAIL,
+  LOGIN_SUCCESS,
+  LOG_OUT, TOKEN_FAIL,
 } from "../../constants";
 
 let initialState = {
@@ -12,11 +12,11 @@ let initialState = {
   registering: false,
   loginError: null,
   registerError: null,
-  user: null
+  user: null,
+  tokenLoginFail: false
 };
 
 const auth = (state = initialState, action) => {
-console.log(action);
   switch (action.type) {
     case LOGIN:
       return {...state,...initialState, ...{loggingIn: true, mode: state.mode}};
@@ -28,6 +28,15 @@ console.log(action);
         ...initialState,
         ...{
           loginError: action.error? action.error : "Impossible de se connecter, veuillez réessayer",
+        }
+      };
+    case TOKEN_FAIL:
+      return {
+        ...state,
+        ...initialState,
+        ...{
+          loggedIn: false,
+          tokenLoginFail: false,
         }
       };
     case LOGIN_SUCCESS:

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Text, SafeAreaView, StatusBar, ActivityIndicator } from 'react-native';
 import { colors, scaleFont, verticalScale, constants } from '../utils'
 import Icon from "react-native-vector-icons/Ionicons";
@@ -12,19 +12,32 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SplashScreen = (props) => {
 
+    const [redirect, setRedirect] = useState('');
+
+    if ((props.auth.loggedIn || props.auth.tokenLoginFail) && !redirect) {
+        setRedirect(true);
+        if (props.auth.tokenLoginFail){
+            AsyncStorage.removeItem('apiToken');
+        }
+
+        setTimeout((
+            () => props.navigation.navigate("OnboardingStories")
+        ), 300);
+
+    }
+
     useEffect( () => {
         async function tokenLogin() {
             const token = await AsyncStorage.getItem('apiToken');
             if (token){
-                // props.initTokenLoginCreator(token);
+                props.initTokenLoginCreator();
+            } else {
+                props.navigation.navigate("OnboardingStories");
             }
         }
         if (!props.auth.loggedIn){
             tokenLogin();
         }
-        setTimeout(() => {
-            props.navigation.navigate("OnboardingStories")
-        }, 3000)
     }, []);
 
     return (

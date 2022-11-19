@@ -108,7 +108,7 @@ class API {
 
 		let resp = null;
 		url = `${API_URL()}${url}`;
-
+		console.log(method, url, data);
 		let headers = await API.headers();
 
 		await axios({
@@ -297,7 +297,6 @@ class API {
 	 * @returns {Promise<*>}
 	 */
 	static post = async (url, data) => {
-		console.log(data);
 		return await API.call({
 			method: "POST",
 			url,

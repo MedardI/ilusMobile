@@ -27,6 +27,7 @@ const LoginScreen = (props) => {
     const [usernameError, setusernameError] = useState('');
     const [passError, setpassError] = useState('');
     const [showError, setShowError] = useState(false);
+    const [loggedIn, setLoggedIn] = useState(false);
 
     const Logo = require("../assets/images/LoginImage.jpeg");
 
@@ -34,8 +35,11 @@ const LoginScreen = (props) => {
         ToastAndroid.show(props.auth.loginError, ToastAndroid.SHORT);
     }
 
-   if (props.auth.loggedIn){
-       props.navigation.navigate("BottomTab");
+   if (props.auth.loggedIn && !loggedIn){
+       setLoggedIn(true);
+       setTimeout((
+           () => props.navigation.navigate("BottomTab")
+       ), 300);
    }
 
     const handlePhoneChange = (text) => {
