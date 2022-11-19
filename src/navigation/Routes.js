@@ -7,8 +7,6 @@ import AuthStack from './AuthStack';
 
 
 const Routes = (props) => {
-
-
     return (
         <NavigationContainer>
             {true ? <AppStack /> : <AuthStack />}
@@ -17,6 +15,6 @@ const Routes = (props) => {
 
 
     );
-}
+};
 
 export default Routes;

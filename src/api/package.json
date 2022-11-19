@@ -1,0 +1,12 @@
+{
+  "name" : "api",
+  "version": "0.1",
+  "description": "Api module",
+  "//": [
+    "All application related api functionalities will reside in this folder.",
+    "Most importantly, only generic functialities that relate to all features or",
+    "can be imported by more than one feature can be added to this api folder.",
+    "Each feature file should contain api communication logic for that particular feature."
+  ]
+
+}
