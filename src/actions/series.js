@@ -4,10 +4,10 @@ import  React from "react";
  * Action creators
  */
 import {
-     DISCOVER_SERIES_URL,
+    DISCOVER_SERIES_URL,
     SERIES_DISCOVER,
     SERIES_DISCOVER_SUCCESS,
-    SERIES_DISCOVER_FAIL
+    SERIES_DISCOVER_FAIL, SERIE_SUCCESS, SERIE_FAIL, SERIE, SERIE_URL
 } from "../constants";
 
 import API from '../api';
@@ -61,4 +61,51 @@ export const discoverResponse = (response) => {
 };
 
 
+//============================= SERIE =============================//
+
+/**
+ *
+ * @returns {{data: *, type: *}}
+ * @constructor
+ */
+export const initSerie = (id) => {
+
+    return function (dispatch) {
+
+        dispatch(serie());
+
+        API.get(SERIE_URL(id)).then((response) => {
+            console.log(response);
+            dispatch(serieResponse(response));
+        }).catch((error) => {
+            console.log(error);
+        })
+    };
+};
+
+/**
+ *
+ * @returns {{type: *}}
+ *
+ * @constructor
+ */
+const serie = () => {
+    return {
+        type: SERIE,
+    }
+};
+
+/**
+ *
+ * @param response
+ * @returns {{data: *, type: *}}
+ * @constructor
+ */
+export const serieResponse = (response) => {
+    return {
+        type: response.status? SERIE_SUCCESS: SERIE_FAIL,
+        data: response.data,
+        error: response.error
+    }
+};
 

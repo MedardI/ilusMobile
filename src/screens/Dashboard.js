@@ -57,6 +57,9 @@ const Dashboard = (props) => {
     const seriesLoading = props.series.fetching;
     const kidsLoading = props.kids.fetching;
 
+    const seriesGenres = (props.misc.genre?.list || []).filter(g => g.kind === 'series');
+    const moviesGenres = (props.misc.genre?.list || []).filter(g => g.kind === 'movie');
+
     return (
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.93)' }}>
             <SafeAreaView />
@@ -111,9 +114,9 @@ const Dashboard = (props) => {
                                                     opacity: 0.7,
                                                     marginTop: verticalScale(4)
                                                 }}
-                                            >CONTINUE WATCHING</Text>
+                                            >CONTINUER À REGARDER</Text>
 
-                                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: "Continue Watching", param2: continuemovies })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
+                                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: "continuer à regarder", param2: 'recent', param3: 'movies' })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
                                                 <MaterialIcons name="chevron-right" size={verticalScale(24)} color={colors.white} />
                                             </TouchableOpacity>
                                         </View>
@@ -124,13 +127,13 @@ const Dashboard = (props) => {
                                             style={{ marginHorizontal: scale(10), marginTop: verticalScale(10) }}
                                             renderItem={({ item }) => {
                                                 return (
-                                                    <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: item, ismovie: true })} style={{ marginHorizontal: scale(6) }} >
+                                                    <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image source={{
                                                             uri: getBackDropURL(item.backdrop)
                                                         }} style={{ height: verticalScale(80), width: scale(130), borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }} />
                                                         <View style={{ width: item.current_time, borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
                                                         </View>
-                                                        <TouchableOpacity activeOpacity={0.5} onPress={() => props.navigation.navigate("PlayerScreen", { param: item, ismovie: true })} style={{ position: 'absolute', top: verticalScale(60), left: scale(90), zIndex: 1 }}>
+                                                        <TouchableOpacity activeOpacity={0.5} onPress={() => props.navigation.navigate("PlayerScreen", { param: item})} style={{ position: 'absolute', top: verticalScale(60), left: scale(90), zIndex: 1 }}>
                                                             <MaterialIcons name="play-circle-outline" color={colors.green} size={verticalScale(40)} />
                                                         </TouchableOpacity>
                                                         <View style={{ backgroundColor: '#303030', paddingLeft: scale(10), borderBottomLeftRadius: verticalScale(6), borderBottomRightRadius: verticalScale(6) }}>
@@ -152,7 +155,7 @@ const Dashboard = (props) => {
 
 
                         {
-                            props.misc.genre?.list?.length ?
+                            moviesGenres.length ?
                                 (<View>
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: verticalScale(15), marginHorizontal: scale(20) }}>
                                         <Text
@@ -163,7 +166,7 @@ const Dashboard = (props) => {
                                                 opacity: 0.7,
                                                 marginTop: verticalScale(4)
                                             }}
-                                        >EXPLORE BY GENRES </Text>
+                                        >EXPLOREZ PAR GENRES </Text>
 
                                     </View>
 
@@ -171,15 +174,15 @@ const Dashboard = (props) => {
                                         style={{ marginTop: verticalScale(10), marginHorizontal: scale(15) }}
                                         horizontal
                                         showsHorizontalScrollIndicator={false}
-                                        data={props.misc.genre.list}
+                                        data={moviesGenres}
                                         renderItem={({ item, index}) => {
                                             return (
                                                 <TouchableOpacity
-                                                    onPress={() => props.navigation.navigate('TileList', { param1: item.title, param2: moviesdata })}
+                                                    onPress={() => props.navigation.navigate('TileList', { param1: item.name, param2: item.id, param3: 'movies' })}
                                                     activeOpacity={0.6}
                                                     style={{ backgroundColor: MaterialColors[index], marginHorizontal: scale(4), borderRadius: verticalScale(6), justifyContent: 'center', alignItems: 'center', paddingHorizontal: scale(7), paddingVertical: scale(7) }} >
                                                     <Text style={{ color: colors.white, textAlignVertical: "center", fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, opacity: 0.9 }}>
-                                                        {item.title}
+                                                        {item.name}
                                                     </Text>
                                                 </TouchableOpacity>
                                             )
@@ -207,7 +210,7 @@ const Dashboard = (props) => {
                                                 }}
                                             >{item.genre}</Text>
 
-                                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: item.title, param2: item.data })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
+                                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: item.genre, param2: item.genreId, param3: 'movies' })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
                                                 <MaterialIcons name="chevron-right" size={verticalScale(24)} color={colors.white} />
                                             </TouchableOpacity>
                                         </View>
@@ -219,7 +222,7 @@ const Dashboard = (props) => {
                                             horizontal
                                             renderItem={({ item }) => {
                                                 return (
-                                                    <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen", { param: item, ismovie: true })} style={{ marginHorizontal: scale(6) }} >
+                                                    <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image
                                                             source={{
                                                                 uri: getBackDropURL(item.backdrop)
@@ -274,9 +277,9 @@ const Dashboard = (props) => {
                                                     opacity: 0.7,
                                                     marginTop: verticalScale(4)
                                                 }}
-                                            >CONTINUE WATCHING</Text>
+                                            >CONTINUER À REGARDER</Text>
 
-                                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: "Continue Watching", param2: continueseries })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
+                                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: "Continuer à regarder", param2: 'recent', param3: 'series' })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
                                                 <MaterialIcons name="chevron-right" size={verticalScale(24)} color={colors.white} />
                                             </TouchableOpacity>
 
@@ -288,13 +291,13 @@ const Dashboard = (props) => {
                                             style={{ marginHorizontal: scale(10), marginTop: verticalScale(10) }}
                                             renderItem={({ item }) => {
                                                 return (
-                                                    <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: item, ismovie: false })} style={{ marginHorizontal: scale(6) }} >
+                                                    <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image  source={{
                                                             uri: getBackDropURL(item.backdrop)
                                                         }} style={{ height: verticalScale(80), width: scale(130), borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }} />
                                                         <View style={{ width: item.current_time, borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
                                                         </View>
-                                                        <TouchableOpacity activeOpacity={0.5} onPress={() => props.navigation.navigate("PlayerScreen", { param: item, ismovie: false })} style={{ position: 'absolute', top: verticalScale(60), left: scale(90), zIndex: 1 }}>
+                                                        <TouchableOpacity activeOpacity={0.5} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ position: 'absolute', top: verticalScale(60), left: scale(90), zIndex: 1 }}>
                                                             <MaterialIcons name="play-circle-outline" color={colors.green} size={verticalScale(40)} />
                                                         </TouchableOpacity>
                                                         <View style={{ backgroundColor: '#303030', paddingLeft: scale(10), borderBottomLeftRadius: verticalScale(6), borderBottomRightRadius: verticalScale(6) }}>
@@ -316,7 +319,7 @@ const Dashboard = (props) => {
                         }
 
                         {
-                            props.misc.genre?.list?.length ?
+                            seriesGenres.length ?
                                 (<View>
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: verticalScale(15), marginHorizontal: scale(20) }}>
                                         <Text
@@ -327,7 +330,7 @@ const Dashboard = (props) => {
                                                 opacity: 0.7,
                                                 marginTop: verticalScale(4)
                                             }}
-                                        >EXPLORE BY GENRES </Text>
+                                        >EXPLOREZ PAR GENRES </Text>
 
                                     </View>
 
@@ -335,15 +338,15 @@ const Dashboard = (props) => {
                                         style={{ marginTop: verticalScale(10), marginHorizontal: scale(15) }}
                                         horizontal
                                         showsHorizontalScrollIndicator={false}
-                                        data={props.misc.genre.list}
+                                        data={seriesGenres}
                                         renderItem={({ item, index}) => {
                                             return (
                                                 <TouchableOpacity
-                                                    onPress={() => props.navigation.navigate('TileList', { param1: item.title, param2: moviesdata })}
+                                                    onPress={() => props.navigation.navigate('TileList', { param1: item.name, param2: item.id, param3: 'series' })}
                                                     activeOpacity={0.6}
                                                     style={{ backgroundColor: MaterialColors[index], marginHorizontal: scale(4), borderRadius: verticalScale(6), justifyContent: 'center', alignItems: 'center', paddingHorizontal: scale(7), paddingVertical: scale(7) }} >
                                                     <Text style={{ color: colors.white, textAlignVertical: "center", fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, opacity: 0.9 }}>
-                                                        {item.title}
+                                                        {item.name}
                                                     </Text>
                                                 </TouchableOpacity>
                                             )
@@ -372,7 +375,7 @@ const Dashboard = (props) => {
                                                 }}
                                             >{item.genre}</Text>
 
-                                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: item.title, param2: item.data })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
+                                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: item.genre, param2: item.genreId, param3: 'series' })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
                                                 <MaterialIcons name="chevron-right" size={verticalScale(24)} color={colors.white} />
                                             </TouchableOpacity>
                                         </View>
@@ -384,7 +387,7 @@ const Dashboard = (props) => {
                                             horizontal
                                             renderItem={({ item }) => {
                                                 return (
-                                                    <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen", { param: item, ismovie: false })} style={{ marginHorizontal: scale(6) }} >
+                                                    <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image  source={{
                                                             uri: getBackDropURL(item.backdrop)
                                                         }} style={{ height: verticalScale(100), width: scale(80), borderRadius: verticalScale(6) }} />
@@ -440,9 +443,9 @@ const Dashboard = (props) => {
                                                     opacity: 0.7,
                                                     marginTop: verticalScale(4)
                                                 }}
-                                            >CONTINUE WATCHING</Text>
+                                            >CONTINUER À REGARDER</Text>
 
-                                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: "Continue Watching", param2: continueseries })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
+                                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: "Continuer à regarder", param2: 'recent', param3: 'kids' })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
                                                 <MaterialIcons name="chevron-right" size={verticalScale(24)} color={colors.white} />
                                             </TouchableOpacity>
 
@@ -454,13 +457,13 @@ const Dashboard = (props) => {
                                             style={{ marginHorizontal: scale(10), marginTop: verticalScale(10) }}
                                             renderItem={({ item }) => {
                                                 return (
-                                                    <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: item, ismovie: false })} style={{ marginHorizontal: scale(6) }} >
+                                                    <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image source={{
                                                             uri: getBackDropURL(item.backdrop)
                                                         }} style={{ height: verticalScale(80), width: scale(130), borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }} />
                                                         <View style={{ width: item.current_time, borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
                                                         </View>
-                                                        <TouchableOpacity activeOpacity={0.5} onPress={() => props.navigation.navigate("PlayerScreen", { param: item, ismovie: false })} style={{ position: 'absolute', top: verticalScale(60), left: scale(90), zIndex: 1 }}>
+                                                        <TouchableOpacity activeOpacity={0.5} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ position: 'absolute', top: verticalScale(60), left: scale(90), zIndex: 1 }}>
                                                             <MaterialIcons name="play-circle-outline" color={colors.green} size={verticalScale(40)} />
                                                         </TouchableOpacity>
                                                         <View style={{ backgroundColor: '#303030', paddingLeft: scale(10), borderBottomLeftRadius: verticalScale(6), borderBottomRightRadius: verticalScale(6) }}>
@@ -498,7 +501,7 @@ const Dashboard = (props) => {
                                                 }}
                                             >{item.genre}</Text>
 
-                                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: item.title, param2: item.data })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
+                                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: item.genre, param2: item.genreId, param3: 'kids' })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
                                                 <MaterialIcons name="chevron-right" size={verticalScale(24)} color={colors.white} />
                                             </TouchableOpacity>
                                         </View>
@@ -510,7 +513,7 @@ const Dashboard = (props) => {
                                             horizontal
                                             renderItem={({ item }) => {
                                                 return (
-                                                    <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen", { param: item, ismovie: true })} style={{ marginHorizontal: scale(6) }} >
+                                                    <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image source={{
                                                             uri: getBackDropURL(item.backdrop)
                                                         }} style={{ height: verticalScale(100), width: scale(80), borderRadius: verticalScale(6) }} />
