@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, FlatList, Image, ActivityIndicator } from 'react-native';
 import AppHeader from '../components/AppHeader';
-import {colors, scale, scaleFont, verticalScale, constants, fullHeight} from '../utils';
+import {colors, scale, scaleFont, verticalScale, constants, fullHeight, fullWidth} from '../utils';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { showMessage } from "react-native-flash-message";
@@ -13,7 +13,13 @@ import {initSerie as getSerieAction} from "../actions/series";
 
 const PlayerScreen = (props) => {
     const data = props.route.params.param;
-    const ismovie = data.category_type === 'movie';
+    let ismovie = false;
+    if (data.type){
+        ismovie = data.type === 'movie';
+    } else if (data.category_type){
+        ismovie = data.category_type === 'movie';
+    }
+
     const [WishList, setWishList] = useState(false);
     const [download, setdownload] = useState(false);
     const [Clips, setClips] = useState(true);
@@ -23,7 +29,9 @@ const PlayerScreen = (props) => {
     const [details, setDetails] = useState(null);
     const [id, setId] = useState(null);
     const [episodes, setEpisodes] = useState([]);
+    const [episode, setEpisode] = useState(null);
     const [episodeInitialised, setEpisodeInitialised] = useState(false);
+    const [error, setError] = useState("");
 
     if (!id){ setId(data.id)}
 
@@ -49,6 +57,8 @@ const PlayerScreen = (props) => {
                     if (movie){
                         setDetails(movie);
                     }
+                } else {
+                    setError(props.movies.all.error);
                 }
                 setLoading(false);
             }
@@ -59,6 +69,8 @@ const PlayerScreen = (props) => {
                     if (serie){
                         setDetails(serie);
                     }
+                } else {
+                    setError(props.series.all.error);
                 }
                 setLoading(false);
             }
@@ -70,6 +82,16 @@ const PlayerScreen = (props) => {
         if (details && details.season && Object.keys(details.season).length){
             const key = Object.keys(details.season)[0];
             setEpisodes(details.season[key]);
+            if (data.currentEpisode){
+                (details.season[key]||[]).forEach(e => {
+                    if (e.id === data.currentEpisode){
+                        setEpisode(e);
+                    }
+                });
+            }
+            if (!episode){
+                setEpisode(details.season[key][0]);
+            }
             setSelectedId(key);
             setEpisodeInitialised(true);
 
@@ -89,6 +111,7 @@ const PlayerScreen = (props) => {
 
     useEffect( () => {
         if (!loading){
+            setError("");
             if (ismovie){
                 const movie = getMovie();
                 if (!movie){
@@ -99,8 +122,6 @@ const PlayerScreen = (props) => {
                 }
             } else {
                 const serie = getSerie();
-                console.log("trying to load");
-                console.log(serie);
                 if (!serie){
                     setLoading(true);
                     props.getSerieAction(id);
@@ -114,7 +135,15 @@ const PlayerScreen = (props) => {
 
     const changeSeason = (season) => {
         setEpisodes(details.season[season]);
+        setEpisode(details.season[season][0]);
         setSelectedId(season);
+        if (data.currentEpisode){
+            (details.season[key]||[]).forEach(e => {
+                if (e.id === data.currentEpisode){
+                    setEpisode(e)
+                }
+            });
+        }
     };
 
     const wishlist = () => {
@@ -185,11 +214,47 @@ const PlayerScreen = (props) => {
 
     const type = ismovie?  "movie": "series";
 
+    const getPlayTitle = () => {
+        if (!ismovie && episode) return `JOUER S${episode.season_number} E${episode.episode_number}`;
+        return "JOUER";
+    };
+
+    console.log(episodes);
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
             <SafeAreaView />
             <StatusBar barStyle={"light-content"} backgroundColor={"black"} hidden={false} translucent={false}
             />
+            {
+                !loading && error ? (
+                    <View>
+                        <View style={{}}>
+                            <Image source={{
+                                uri: data.poster ? getPosterURL(data.poster): ""
+                            }} style={{ height: fullHeight, width: scale(360) }} />
+                        </View>
+                        <View style={{ position: 'absolute', }}>
+                            <AppHeader heading="" navigation={() => props.navigation.goBack()} showicon={true} />
+                        </View>
+                        <View
+                            style={{
+                                position: 'absolute',
+                                top: 250,
+                                width: fullWidth,
+                                alignItems: "center"
+                            }}>
+                            <Text
+                                style={{
+                                    backgroundColor: "#000000",
+                                    color: "#ffffff",
+                                    padding: 25,
+                                    fontSize: 16,
+                                    borderRadius: 4
+                                }}> {error} </Text>
+                        </View>
+                    </View>
+                ): null
+            }
             {
                 loading? (
                     <View style={{
@@ -236,9 +301,12 @@ const PlayerScreen = (props) => {
                         </View>
 
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: scale(20), marginTop: verticalScale(10) }}>
-                            <TouchableOpacity onPress={() => props.navigation.navigate("VideoPlayer", { param1: data })} style={{ flexDirection: 'row', backgroundColor: colors.green, width: scale(180), height: verticalScale(40), borderRadius: verticalScale(12), justifyContent: 'center', alignItems: 'center' }}>
+                            <TouchableOpacity onPress={() => props.navigation.navigate("VideoPlayer", { param1: data, param2: {
+                                    episodeId: episode ? episode.id: '',
+                                    season: selectedId
+                                } })} style={{ flexDirection: 'row', backgroundColor: colors.green, width: scale(180), height: verticalScale(40), borderRadius: verticalScale(12), justifyContent: 'center', alignItems: 'center' }}>
                                 <MaterialIcons name="play-arrow" color={colors.white} size={verticalScale(20)} />
-                                <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_BOLD }}>JOUER </Text>
+                                <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_BOLD }}> {getPlayTitle()} </Text>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={() => wishlist()} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(30) }} >
                                 <FontAwesome name="heart" color={WishList ? colors.green : colors.greyColour} size={verticalScale(26)} />
@@ -328,7 +396,10 @@ const PlayerScreen = (props) => {
                                         data={episodes}
                                         renderItem={({ item, index }) => {
                                             return (
-                                                <TouchableOpacity style={{ marginHorizontal: scale(6) }} >
+                                                <TouchableOpacity onPress={() => props.navigation.navigate("VideoPlayer", { param1: data, param2: {
+                                                    episodeId: item.id,
+                                                    season: selectedId
+                                                    } })} style={{ marginHorizontal: scale(6) }} >
                                                     <Image source={{
                                                         uri: getBackDropURL(item.backdrop)
                                                     }} style={{ height: verticalScale(110), width: scale(130), borderRadius: verticalScale(6), opacity: 0.5 }} />

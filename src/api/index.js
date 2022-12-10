@@ -111,6 +111,7 @@ class API {
 		console.log(method, url, data);
 		let headers = await API.headers();
 
+		console.log(headers);
 		await axios({
 			method,
 			url,
@@ -142,10 +143,14 @@ class API {
 		}).catch((err) => {
 
 			console.log("error");
-			console.log(err.response);
-			console.log(JSON.stringify(err));
+			console.log(err);
 			const data = err.response?.data;
-			let message = data ? data.message? data.message: "": "";
+			let message = data ? data.message? data.message: "Une erreur s'est produite. Veuillez réessayer!": "Une erreur s'est produite. Veuillez réessayer!";
+
+			console.log(err.status);
+			if (err.response && err.response.status === 404){
+				message = "Cette lecture n'est plus disponible, toutes nos excuses!";
+			}
 
 			if (err.message && err.message === "Network Error") {
 				message = "Vérifiez votre connection internet!";
@@ -156,7 +161,6 @@ class API {
 				message = "";
 				if(state.auth.loggedIn){
 					Store.dispatch({type: LOG_OUT});
-					// Global.showErrorToast(message, 'bottom');
 				}
 
 			}

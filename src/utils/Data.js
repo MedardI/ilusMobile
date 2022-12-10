@@ -1,5 +1,28 @@
 import colors from "./colors"
 
+export const allGenres = {
+    'Action': 'Action',
+    'Aventure': 'Adventure',
+    'Animation': 'Animation',
+    'Biographie': 'Biography',
+    'Comédie' :'Comedy',
+    'Crime':'Crime',
+    'Documentaire' :'Documentary',
+    'Drame' :'Drama',
+    'Famille' :'Family',
+    'Fantaisie' :'Fantasy',
+    'Histoire':'History',
+    'Horreur' :'Horror',
+    'Musique' :'Music',
+    'Misicale':'Musical',
+    'Mystere' :'Mystery',
+    'Romance' :'Romance',
+    'Sci - Fi' :'Sci-Fi',
+    'Sport' :'Sport',
+    'Thriller' :'Thriller',
+    'Guerre' :'War',
+    'Religieux': "Religious"
+};
 
 export const MaterialColors = [
     '#F44336',

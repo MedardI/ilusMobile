@@ -2,7 +2,7 @@ import {
   MOVIE, MOVIE_FAIL, MOVIE_SUCCESS,
   MOVIES_DISCOVER,
   MOVIES_DISCOVER_FAIL,
-  MOVIES_DISCOVER_SUCCESS,
+  MOVIES_DISCOVER_SUCCESS, MOVIES_SUCCESS,
 } from "../../constants";
 
 let initialState = {
@@ -23,15 +23,22 @@ let initialState = {
 };
 
 const addMovie = (movies, response) => {
-  console.log("All before");
-  console.log(movies);
   if (movies.length >= 10){
     movies.pop();
   }
-  console.log("All After");
-  console.log(movies);
  movies.push(response);
   return movies;
+};
+
+const updateMovies = (state, action) => {
+  state.data = state.data.map(movies => {
+    if (movies.genreId === action.data.genre){
+      movies.list = action.data.movies;
+    }
+    return movies;
+  });
+
+  return state;
 };
 
 const movies = (state = initialState, action) => {
@@ -82,6 +89,12 @@ const movies = (state = initialState, action) => {
             recent: action.data?.recenlty || []
           }
         },
+        all: movies
+      };
+    case MOVIES_SUCCESS:
+      return {
+        ...state,
+        discover: updateMovies(state.discover, action),
         all: movies
       };
   }

@@ -1,20 +1,27 @@
 import React, {useState} from 'react';
-import { View, SafeAreaView, StatusBar, Image, Text, TouchableOpacity } from 'react-native';
+import { View, SafeAreaView, StatusBar, Text, TouchableOpacity } from 'react-native';
+import Image from "../components/Image";
 import { FlatList } from 'react-native-gesture-handler';
 import AppHeader from '../components/AppHeader';
 import { colors, verticalScale, scale, scaleFont, constants } from '../utils';
 import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
 import Env from "../env";
+import {
+    getMovies,
+    initMovies
+} from "../actions/movies";
+import {allGenres} from "../utils/Data";
 
 const TileLists = (props) => {
     const heading = props?.route?.params?.param1;
     const [data, setData] = useState([]);
     const [loaded, setLoaded] = useState(false);
+    const [fetch, setFetch] = useState(true);
+    const type = props?.route?.params?.param3;
+    const genre = props?.route?.params?.param2;
 
     if (!loaded){
-        const type = props?.route?.params?.param3;
-        const genre = props?.route?.params?.param2;
 
         if (type === 'movies'){
             if (genre === 'recent'){
@@ -56,6 +63,47 @@ const TileLists = (props) => {
         return `${Env.cloudFront}/posters/${image}`;
     };
 
+    const convertRunTime = (time) => {
+        const hours = Math.floor(time / 60);
+        const min = Math.floor(time) - (hours * 60);
+
+        return `${hours}h ${min}'`;
+    };
+
+    const load = async () => {
+        let genreName = '';
+        if (fetch){
+            if (props.misc.genre.list){
+                const found = props.misc.genre.list.find(g => g.id === genre);
+                if (found) {
+                    genreName = found.name;
+                    if (allGenres[genreName]) genreName = allGenres[genreName];
+                }
+            }
+
+            if (type === 'movies'){
+                let page = 1;
+                if (data.length >= 50) {
+                    page = Math.floor(data.length/50) + 1;
+                }
+                await getMovies(genreName, page).then((response) => {
+                    let movies = response.data.movies;
+                    if (page === 1){
+                        setData(movies.data);
+                    } else {
+                        setData([...data, ...movies.data]);
+                    }
+                    if (page === 1){
+                        props.initMovies(response, genre);
+                    }
+                    setFetch(movies.data.length === 50);
+                }).catch((error) => {
+                    console.log(error);
+                });
+            }
+        }
+    };
+
     return (
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.92)' }}>
             <SafeAreaView />
@@ -66,6 +114,7 @@ const TileLists = (props) => {
             <FlatList
                 data={data}
                 numColumns={2}
+                onEndReached={load}
                 style={{ alignSelf: 'center', marginHorizontal: scale(10), marginTop: verticalScale(10) }}
                 renderItem={({ item }) => {
                     return (
@@ -77,8 +126,12 @@ const TileLists = (props) => {
                                 <Text style={{ marginLeft: scale(5), color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>
                                     {item.name}</Text>
                                 <View style={{ alignSelf: 'center', width: scale(140), flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>
-                                        {item.runtime}</Text>
+                                    {
+                                        item.runtime ? (
+                                            <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>
+                                                {convertRunTime(item.runtime)}</Text>
+                                        ): null
+                                    }
                                     <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>
                                         {item.year}</Text>
                                 </View>
@@ -97,7 +150,7 @@ const TileLists = (props) => {
 
 const mapDispatchToProps = dispatch =>
     bindActionCreators({
-
+        initMovies
     }, dispatch);
 
 const mapStateToProps = (state)  => {

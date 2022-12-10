@@ -80,6 +80,7 @@ package-lock.json
 /coverage
 /third-party
 
+/android/app/build
 # Root dir shouldn't have Xcode project
 /*.xcodeproj
 

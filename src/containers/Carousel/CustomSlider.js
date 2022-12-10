@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Dimensions, TouchableOpacity, View, Image } from "react-native";
+import React from 'react';
+import { TouchableOpacity, View } from "react-native";
+import Image from "../../components/Image";
 import Carousel from "react-native-snap-carousel";
-import { colors, verticalScale, scale, scaleFont } from '../../utils';
+import { verticalScale, scale } from '../../utils';
 import { useNavigation } from '@react-navigation/native';
 import Env from "../../env";
 
@@ -17,7 +18,7 @@ const CustomSlider = (props) => {
   const CarouselItem = ({ item, index }) => {
 
     return (
-      <TouchableOpacity onPress={() => navigation.navigate("PlayerScreen", { param: item, ismovie: item.type === 'movie' })} >
+      <TouchableOpacity onPress={() => navigation.navigate("PlayerScreen", { param: item })} >
         <Image
           source={{
               uri: getBackDropURL(item.backdrop)

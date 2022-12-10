@@ -1,9 +1,20 @@
 import React, {useEffect, useState} from 'react';
-import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, FlatList, Image, ActivityIndicator } from 'react-native';
+import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, FlatList, ActivityIndicator } from 'react-native';
+import Image from "../components/Image";
 import { colors, scale, scaleFont, verticalScale, constants } from '../utils';
 import CustomSlider from '../containers/Carousel/CustomSlider'
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { MaterialColors, continuemovies, genredata, moviesdata, carouseldataSeries, continueseries, MoviesData, SeriesData } from '../utils/Data';
+import {
+    MaterialColors,
+    continuemovies,
+    genredata,
+    moviesdata,
+    carouseldataSeries,
+    continueseries,
+    MoviesData,
+    SeriesData,
+    allGenres
+} from '../utils/Data';
 import {bindActionCreators} from "redux";
 import {
     initDiscover as initDiscoverKids
@@ -12,7 +23,8 @@ import {
     initDiscover as initDiscoverSeries
 } from "../actions/series";
 import {
-    initDiscover as initDiscoverMovies
+    initDiscover as initDiscoverMovies,
+    initFetchMovies
 } from "../actions/movies";
 import {
     initGenre
@@ -27,12 +39,25 @@ const Dashboard = (props) => {
     const [animationTab, setanimationTab] = useState(false);
 
     const [fetchingMovies, setFetchingMovies] = useState(false);
+    const [fetchedExtraMovies, setFetchedExtraMovies] = useState(false);
     const [fetchingSeries, setFetchingSeries] = useState(false);
     const [fetchingKids, setFetchingKids] = useState(false);
 
     const getBackDropURL = (image) => {
         return `${Env.cloudFront}/backdrops/${image}`;
     };
+
+    if (props.movies.discover.fetched
+        && !fetchedExtraMovies){
+        setFetchedExtraMovies(true);
+        props.movies.discover.data.map((data) => {
+            if (data.list.length < 4){
+                const genreName = allGenres[data.genre];
+                console.log(genreName);
+                props.initFetchMovies(genreName, data.genreId);
+            }
+        });
+    }
 
     useEffect( () => {
         if (!props.movies.discover.fetched && !fetchingMovies){
@@ -53,12 +78,23 @@ const Dashboard = (props) => {
         }
     }, []);
 
+    const getRecentWidth = (current, total) => {
+        const full = scale(130);
+        if (current && total){
+            return (current * full)/ total;
+        }
+        return 0;
+    };
+
     const moviesLoading = props.movies.fetching;
     const seriesLoading = props.series.fetching;
     const kidsLoading = props.kids.fetching;
 
-    const seriesGenres = (props.misc.genre?.list || []).filter(g => g.kind === 'series');
-    const moviesGenres = (props.misc.genre?.list || []).filter(g => g.kind === 'movie');
+    const currentMovieGenres = props.movies.discover.data.map(m => m.genreId);
+    const currentSeriesGenres = props.series.discover.data.map(m => m.genreId);
+
+    const seriesGenres = (props.misc.genre?.list || []).filter(g => g.kind === 'series' && currentSeriesGenres.includes(g.id));
+    const moviesGenres = (props.misc.genre?.list || []).filter(g => g.kind === 'movie' && currentMovieGenres.includes(g.id));
 
     return (
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.93)' }}>
@@ -131,13 +167,15 @@ const Dashboard = (props) => {
                                                         <Image source={{
                                                             uri: getBackDropURL(item.backdrop)
                                                         }} style={{ height: verticalScale(80), width: scale(130), borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }} />
-                                                        <View style={{ width: item.current_time, borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
+                                                        <View style={{ width: getRecentWidth(item.current_time, item.duration_time), borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
                                                         </View>
                                                         <TouchableOpacity activeOpacity={0.5} onPress={() => props.navigation.navigate("PlayerScreen", { param: item})} style={{ position: 'absolute', top: verticalScale(60), left: scale(90), zIndex: 1 }}>
                                                             <MaterialIcons name="play-circle-outline" color={colors.green} size={verticalScale(40)} />
                                                         </TouchableOpacity>
                                                         <View style={{ backgroundColor: '#303030', paddingLeft: scale(10), borderBottomLeftRadius: verticalScale(6), borderBottomRightRadius: verticalScale(6) }}>
-                                                            <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
+                                                            <Text
+                                                                numberOfLines={2}
+                                                                style={{ width: scale(130), color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
                                                                 {item.name}
                                                             </Text>
                                                             <Text style={{ color: colors.greyColour, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_MEDIUM, marginBottom: verticalScale(5) }}>
@@ -291,17 +329,19 @@ const Dashboard = (props) => {
                                             style={{ marginHorizontal: scale(10), marginTop: verticalScale(10) }}
                                             renderItem={({ item }) => {
                                                 return (
-                                                    <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(6) }} >
+                                                    <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: { id: item.series_id, currentEpisode: item.episode_id } })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image  source={{
                                                             uri: getBackDropURL(item.backdrop)
                                                         }} style={{ height: verticalScale(80), width: scale(130), borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }} />
-                                                        <View style={{ width: item.current_time, borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
+                                                        <View style={{ width: getRecentWidth(item.current_time, item.duration_time), borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
                                                         </View>
                                                         <TouchableOpacity activeOpacity={0.5} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ position: 'absolute', top: verticalScale(60), left: scale(90), zIndex: 1 }}>
                                                             <MaterialIcons name="play-circle-outline" color={colors.green} size={verticalScale(40)} />
                                                         </TouchableOpacity>
-                                                        <View style={{ backgroundColor: '#303030', paddingLeft: scale(10), borderBottomLeftRadius: verticalScale(6), borderBottomRightRadius: verticalScale(6) }}>
-                                                            <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
+                                                        <View style={{ width: scale(130), backgroundColor: '#303030', paddingLeft: scale(10), borderBottomLeftRadius: verticalScale(6), borderBottomRightRadius: verticalScale(6) }}>
+                                                            <Text
+                                                                numberOfLines={2}
+                                                                style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
                                                                 {item.name}
                                                             </Text>
                                                             <Text style={{ color: colors.greyColour, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_MEDIUM, marginBottom: verticalScale(5) }}>
@@ -426,7 +466,7 @@ const Dashboard = (props) => {
                         <View>
                             {
                                 props.series.discover.top.length ?
-                                    (<CustomSlider data={props.series.discover.top} />): (<View/>)
+                                    (<CustomSlider data={props.kids.discover.top} />): (<View/>)
                             }
                         </View>
 
@@ -461,13 +501,15 @@ const Dashboard = (props) => {
                                                         <Image source={{
                                                             uri: getBackDropURL(item.backdrop)
                                                         }} style={{ height: verticalScale(80), width: scale(130), borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }} />
-                                                        <View style={{ width: item.current_time, borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
+                                                        <View style={{ width: getRecentWidth(item.current_time, item.duration_time), borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
                                                         </View>
                                                         <TouchableOpacity activeOpacity={0.5} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ position: 'absolute', top: verticalScale(60), left: scale(90), zIndex: 1 }}>
                                                             <MaterialIcons name="play-circle-outline" color={colors.green} size={verticalScale(40)} />
                                                         </TouchableOpacity>
-                                                        <View style={{ backgroundColor: '#303030', paddingLeft: scale(10), borderBottomLeftRadius: verticalScale(6), borderBottomRightRadius: verticalScale(6) }}>
-                                                            <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
+                                                        <View style={{width: scale(130), backgroundColor: '#303030', paddingLeft: scale(10), borderBottomLeftRadius: verticalScale(6), borderBottomRightRadius: verticalScale(6) }}>
+                                                            <Text
+                                                                numberOfLines={2}
+                                                                style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
                                                                 {item.name}
                                                             </Text>
                                                             <Text style={{ color: colors.greyColour, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_MEDIUM, marginBottom: verticalScale(5) }}>
@@ -540,7 +582,8 @@ const mapDispatchToProps = dispatch =>
         initDiscoverMovies,
         initDiscoverSeries,
         initDiscoverKids,
-        initGenre
+        initGenre,
+        initFetchMovies
     }, dispatch);
 
 const mapStateToProps = (state)  => {

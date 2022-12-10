@@ -10,6 +10,7 @@ MERGED from [com.facebook.flipper:flipper-network-plugin:0.125.0] /Users/medard.
 MERGED from [com.facebook.flipper:flipper-fresco-plugin:0.125.0] /Users/medard.ilunga/.gradle/caches/transforms-3/3cdfe1d94f781b3cd4fe147ba3c7c694/transformed/jetified-flipper-fresco-plugin-0.125.0/AndroidManifest.xml:8:1-15:12
 MERGED from [:react-native-async-storage_async-storage] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/@react-native-async-storage/async-storage/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-9:12
 MERGED from [:react-native-community_netinfo] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/@react-native-community/netinfo/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-12:12
+MERGED from [:react-native-fast-image] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/react-native-fast-image/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-9:12
 MERGED from [:react-native-gesture-handler] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/react-native-gesture-handler/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-9:12
 MERGED from [:react-native-safe-area-context] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/react-native-safe-area-context/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-9:12
 MERGED from [:react-native-screens] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/react-native-screens/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:2:1-9:12
@@ -40,6 +41,8 @@ MERGED from [androidx.appcompat:appcompat-resources:1.4.1] /Users/medard.ilunga/
 MERGED from [androidx.autofill:autofill:1.1.0] /Users/medard.ilunga/.gradle/caches/transforms-3/03961bb39c5326193b471a32a366795f/transformed/jetified-autofill-1.1.0/AndroidManifest.xml:17:1-24:12
 MERGED from [com.facebook.fresco:middleware:2.6.0] /Users/medard.ilunga/.gradle/caches/transforms-3/84d0f8f797135dc2bbc02d3140bc824e/transformed/jetified-middleware-2.6.0/AndroidManifest.xml:2:1-9:12
 MERGED from [com.facebook.fresco:ui-common:2.6.0] /Users/medard.ilunga/.gradle/caches/transforms-3/68677fb7c27918c0ed65aa4eb422a170/transformed/jetified-ui-common-2.6.0/AndroidManifest.xml:2:1-9:12
+MERGED from [com.github.bumptech.glide:okhttp3-integration:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/946279f6a850cbad45365fe5aa0b51df/transformed/jetified-okhttp3-integration-4.12.0/AndroidManifest.xml:2:1-16:12
+MERGED from [com.github.bumptech.glide:glide:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/c620de569890dff5fb53a8fdf1d40553/transformed/jetified-glide-4.12.0/AndroidManifest.xml:2:1-12:12
 MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /Users/medard.ilunga/.gradle/caches/transforms-3/6afad4ecd3a57249bbfd25877602d3c5/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/medard.ilunga/.gradle/caches/transforms-3/1bd2365acb235464b453b7b03dd90348/transformed/interpolator-1.0.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.core:core-ktx:1.6.0] /Users/medard.ilunga/.gradle/caches/transforms-3/6362dee607cba3e65f4f5cc5b2277067/transformed/jetified-core-ktx-1.6.0/AndroidManifest.xml:2:1-9:12
@@ -71,6 +74,8 @@ MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/medard.ilunga/.g
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.3.1] /Users/medard.ilunga/.gradle/caches/transforms-3/ce3bd6ddf2c71b855c92a6ed93215d5a/transformed/jetified-lifecycle-viewmodel-savedstate-2.3.1/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.savedstate:savedstate:1.1.0] /Users/medard.ilunga/.gradle/caches/transforms-3/abc5edb0f6f7d036cc231847ca5a4e48/transformed/jetified-savedstate-1.1.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.3.1] /Users/medard.ilunga/.gradle/caches/transforms-3/42704fbbed6008efb81a97a397c75d93/transformed/lifecycle-viewmodel-2.3.1/AndroidManifest.xml:17:1-24:12
+MERGED from [com.github.bumptech.glide:gifdecoder:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/a07b0e5e563fb239d2b7279f127e14b0/transformed/jetified-gifdecoder-4.12.0/AndroidManifest.xml:2:1-11:12
+MERGED from [androidx.exifinterface:exifinterface:1.2.0] /Users/medard.ilunga/.gradle/caches/transforms-3/e919432ca6f28a73557507ec283c3d66/transformed/exifinterface-1.2.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.cardview:cardview:1.0.0] /Users/medard.ilunga/.gradle/caches/transforms-3/c8cd6e3e8fc63494683ed420205b6ed7/transformed/cardview-1.0.0/AndroidManifest.xml:17:1-22:12
 MERGED from [com.google.android.exoplayer:exoplayer-datasource:2.18.1] /Users/medard.ilunga/.gradle/caches/transforms-3/0ab592d8d3638c0760e31b52ca1d3792/transformed/jetified-exoplayer-datasource-2.18.1/AndroidManifest.xml:17:1-24:12
 MERGED from [com.google.android.exoplayer:exoplayer-database:2.18.1] /Users/medard.ilunga/.gradle/caches/transforms-3/610fa975366e52e958b0cc6ab661320c/transformed/jetified-exoplayer-database-2.18.1/AndroidManifest.xml:17:1-24:12
@@ -127,10 +132,16 @@ MERGED from [com.facebook.soloader:soloader:0.10.3] /Users/medard.ilunga/.gradle
 MERGED from [com.facebook.soloader:soloader:0.10.3] /Users/medard.ilunga/.gradle/caches/transforms-3/6c9a0e479a14c325c767b3e86ad822cb/transformed/jetified-soloader-0.10.3/AndroidManifest.xml:11:5-20
 MERGED from [com.google.android.material:material:1.1.0] /Users/medard.ilunga/.gradle/caches/transforms-3/19f285c5360101e74a65ffd2dd8f0c51/transformed/material-1.1.0/AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.1.0] /Users/medard.ilunga/.gradle/caches/transforms-3/19f285c5360101e74a65ffd2dd8f0c51/transformed/material-1.1.0/AndroidManifest.xml:22:5-20
+MERGED from [com.github.bumptech.glide:okhttp3-integration:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/946279f6a850cbad45365fe5aa0b51df/transformed/jetified-okhttp3-integration-4.12.0/AndroidManifest.xml:10:5-14:19
+MERGED from [com.github.bumptech.glide:okhttp3-integration:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/946279f6a850cbad45365fe5aa0b51df/transformed/jetified-okhttp3-integration-4.12.0/AndroidManifest.xml:10:5-14:19
+MERGED from [com.github.bumptech.glide:glide:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/c620de569890dff5fb53a8fdf1d40553/transformed/jetified-glide-4.12.0/AndroidManifest.xml:10:5-20
+MERGED from [com.github.bumptech.glide:glide:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/c620de569890dff5fb53a8fdf1d40553/transformed/jetified-glide-4.12.0/AndroidManifest.xml:10:5-20
 MERGED from [androidx.emoji2:emoji2:1.0.0] /Users/medard.ilunga/.gradle/caches/transforms-3/31798a0ea3f25ea98e44c876b4851b08/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:25:5-35:19
 MERGED from [androidx.emoji2:emoji2:1.0.0] /Users/medard.ilunga/.gradle/caches/transforms-3/31798a0ea3f25ea98e44c876b4851b08/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:25:5-35:19
 MERGED from [androidx.core:core:1.7.0] /Users/medard.ilunga/.gradle/caches/transforms-3/b5a8e99dac667ebea08e9f9757d3b404/transformed/core-1.7.0/AndroidManifest.xml:24:5-89
 MERGED from [androidx.core:core:1.7.0] /Users/medard.ilunga/.gradle/caches/transforms-3/b5a8e99dac667ebea08e9f9757d3b404/transformed/core-1.7.0/AndroidManifest.xml:24:5-89
+MERGED from [com.github.bumptech.glide:gifdecoder:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/a07b0e5e563fb239d2b7279f127e14b0/transformed/jetified-gifdecoder-4.12.0/AndroidManifest.xml:9:5-20
+MERGED from [com.github.bumptech.glide:gifdecoder:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/a07b0e5e563fb239d2b7279f127e14b0/transformed/jetified-gifdecoder-4.12.0/AndroidManifest.xml:9:5-20
 MERGED from [androidx.lifecycle:lifecycle-process:2.4.0] /Users/medard.ilunga/.gradle/caches/transforms-3/39517e1b011367242185b54afc0b3c9e/transformed/jetified-lifecycle-process-2.4.0/AndroidManifest.xml:25:5-35:19
 MERGED from [androidx.lifecycle:lifecycle-process:2.4.0] /Users/medard.ilunga/.gradle/caches/transforms-3/39517e1b011367242185b54afc0b3c9e/transformed/jetified-lifecycle-process-2.4.0/AndroidManifest.xml:25:5-35:19
 MERGED from [androidx.startup:startup-runtime:1.0.0] /Users/medard.ilunga/.gradle/caches/transforms-3/bf5c3c76aa1a63b86455021de73134fc/transformed/jetified-startup-runtime-1.0.0/AndroidManifest.xml:25:5-31:19
@@ -201,6 +212,8 @@ MERGED from [:react-native-async-storage_async-storage] /Users/medard.ilunga/Pro
 MERGED from [:react-native-async-storage_async-storage] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/@react-native-async-storage/async-storage/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-7:41
 MERGED from [:react-native-community_netinfo] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/@react-native-community/netinfo/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-7:41
 MERGED from [:react-native-community_netinfo] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/@react-native-community/netinfo/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-7:41
+MERGED from [:react-native-fast-image] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/react-native-fast-image/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-7:41
+MERGED from [:react-native-fast-image] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/react-native-fast-image/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-7:41
 MERGED from [:react-native-gesture-handler] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/react-native-gesture-handler/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-7:41
 MERGED from [:react-native-gesture-handler] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/react-native-gesture-handler/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-7:41
 MERGED from [:react-native-safe-area-context] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/react-native-safe-area-context/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:5:5-7:41
@@ -261,6 +274,10 @@ MERGED from [com.facebook.fresco:middleware:2.6.0] /Users/medard.ilunga/.gradle/
 MERGED from [com.facebook.fresco:middleware:2.6.0] /Users/medard.ilunga/.gradle/caches/transforms-3/84d0f8f797135dc2bbc02d3140bc824e/transformed/jetified-middleware-2.6.0/AndroidManifest.xml:5:5-7:41
 MERGED from [com.facebook.fresco:ui-common:2.6.0] /Users/medard.ilunga/.gradle/caches/transforms-3/68677fb7c27918c0ed65aa4eb422a170/transformed/jetified-ui-common-2.6.0/AndroidManifest.xml:5:5-7:41
 MERGED from [com.facebook.fresco:ui-common:2.6.0] /Users/medard.ilunga/.gradle/caches/transforms-3/68677fb7c27918c0ed65aa4eb422a170/transformed/jetified-ui-common-2.6.0/AndroidManifest.xml:5:5-7:41
+MERGED from [com.github.bumptech.glide:okhttp3-integration:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/946279f6a850cbad45365fe5aa0b51df/transformed/jetified-okhttp3-integration-4.12.0/AndroidManifest.xml:6:5-8:41
+MERGED from [com.github.bumptech.glide:okhttp3-integration:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/946279f6a850cbad45365fe5aa0b51df/transformed/jetified-okhttp3-integration-4.12.0/AndroidManifest.xml:6:5-8:41
+MERGED from [com.github.bumptech.glide:glide:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/c620de569890dff5fb53a8fdf1d40553/transformed/jetified-glide-4.12.0/AndroidManifest.xml:6:5-8:41
+MERGED from [com.github.bumptech.glide:glide:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/c620de569890dff5fb53a8fdf1d40553/transformed/jetified-glide-4.12.0/AndroidManifest.xml:6:5-8:41
 MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /Users/medard.ilunga/.gradle/caches/transforms-3/6afad4ecd3a57249bbfd25877602d3c5/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /Users/medard.ilunga/.gradle/caches/transforms-3/6afad4ecd3a57249bbfd25877602d3c5/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/medard.ilunga/.gradle/caches/transforms-3/1bd2365acb235464b453b7b03dd90348/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
@@ -323,6 +340,10 @@ MERGED from [androidx.savedstate:savedstate:1.1.0] /Users/medard.ilunga/.gradle/
 MERGED from [androidx.savedstate:savedstate:1.1.0] /Users/medard.ilunga/.gradle/caches/transforms-3/abc5edb0f6f7d036cc231847ca5a4e48/transformed/jetified-savedstate-1.1.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.3.1] /Users/medard.ilunga/.gradle/caches/transforms-3/42704fbbed6008efb81a97a397c75d93/transformed/lifecycle-viewmodel-2.3.1/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.3.1] /Users/medard.ilunga/.gradle/caches/transforms-3/42704fbbed6008efb81a97a397c75d93/transformed/lifecycle-viewmodel-2.3.1/AndroidManifest.xml:20:5-22:41
+MERGED from [com.github.bumptech.glide:gifdecoder:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/a07b0e5e563fb239d2b7279f127e14b0/transformed/jetified-gifdecoder-4.12.0/AndroidManifest.xml:5:5-7:41
+MERGED from [com.github.bumptech.glide:gifdecoder:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/a07b0e5e563fb239d2b7279f127e14b0/transformed/jetified-gifdecoder-4.12.0/AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.exifinterface:exifinterface:1.2.0] /Users/medard.ilunga/.gradle/caches/transforms-3/e919432ca6f28a73557507ec283c3d66/transformed/exifinterface-1.2.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.exifinterface:exifinterface:1.2.0] /Users/medard.ilunga/.gradle/caches/transforms-3/e919432ca6f28a73557507ec283c3d66/transformed/exifinterface-1.2.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.cardview:cardview:1.0.0] /Users/medard.ilunga/.gradle/caches/transforms-3/c8cd6e3e8fc63494683ed420205b6ed7/transformed/cardview-1.0.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.cardview:cardview:1.0.0] /Users/medard.ilunga/.gradle/caches/transforms-3/c8cd6e3e8fc63494683ed420205b6ed7/transformed/cardview-1.0.0/AndroidManifest.xml:20:5-44
 MERGED from [com.google.android.exoplayer:exoplayer-datasource:2.18.1] /Users/medard.ilunga/.gradle/caches/transforms-3/0ab592d8d3638c0760e31b52ca1d3792/transformed/jetified-exoplayer-datasource-2.18.1/AndroidManifest.xml:20:5-22:41
@@ -387,6 +408,12 @@ MERGED from [com.google.android.exoplayer:exoplayer-common:2.18.1] /Users/medard
 MERGED from [com.google.android.exoplayer:exoplayer-common:2.18.1] /Users/medard.ilunga/.gradle/caches/transforms-3/509a4867f6d46183f4a80dd494776c82/transformed/jetified-exoplayer-common-2.18.1/AndroidManifest.xml:24:5-79
 	android:name
 		ADDED from [:react-native-community_netinfo] /Users/medard.ilunga/Project/ilus/mobile/Code/node_modules/@react-native-community/netinfo/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:9:22-76
+meta-data#com.bumptech.glide.integration.okhttp3.OkHttpGlideModule
+ADDED from [com.github.bumptech.glide:okhttp3-integration:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/946279f6a850cbad45365fe5aa0b51df/transformed/jetified-okhttp3-integration-4.12.0/AndroidManifest.xml:11:9-13:43
+	android:value
+		ADDED from [com.github.bumptech.glide:okhttp3-integration:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/946279f6a850cbad45365fe5aa0b51df/transformed/jetified-okhttp3-integration-4.12.0/AndroidManifest.xml:13:13-40
+	android:name
+		ADDED from [com.github.bumptech.glide:okhttp3-integration:4.12.0] /Users/medard.ilunga/.gradle/caches/transforms-3/946279f6a850cbad45365fe5aa0b51df/transformed/jetified-okhttp3-integration-4.12.0/AndroidManifest.xml:12:13-84
 provider#androidx.startup.InitializationProvider
 ADDED from [androidx.emoji2:emoji2:1.0.0] /Users/medard.ilunga/.gradle/caches/transforms-3/31798a0ea3f25ea98e44c876b4851b08/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:26:9-34:20
 MERGED from [androidx.lifecycle:lifecycle-process:2.4.0] /Users/medard.ilunga/.gradle/caches/transforms-3/39517e1b011367242185b54afc0b3c9e/transformed/jetified-lifecycle-process-2.4.0/AndroidManifest.xml:26:9-34:20
