@@ -27,7 +27,7 @@ const slides = [
         key: 3,
         title: 'Diffusez sur n\'importe quel appareil Android!',
         text: 'Regardez sur n\'importe quel appareil Android',
-        image: require('../assets/images/Logo.jpeg'),
+        image: require('../assets/images/slides-logo.jpeg'),
         backgroundColor: '#22bcb5',
     }
 ];

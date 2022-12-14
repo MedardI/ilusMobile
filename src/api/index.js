@@ -111,7 +111,6 @@ class API {
 		console.log(method, url, data);
 		let headers = await API.headers();
 
-		console.log(headers);
 		await axios({
 			method,
 			url,

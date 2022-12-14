@@ -16,7 +16,8 @@ const PlayerScreen = (props) => {
     let ismovie = false;
     if (data.type){
         ismovie = data.type === 'movie';
-    } else if (data.category_type){
+    }
+    if (data.category_type){
         ismovie = data.category_type === 'movie';
     }
 
@@ -287,7 +288,7 @@ const PlayerScreen = (props) => {
                         <View style={{ paddingLeft: scale(10), width: scale(360), justifyContent: 'center', marginTop: verticalScale(-46), backgroundColor: 'rgba(0,0,0,0.7)', borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }}>
                             <Text style={{ color: colors.white, fontSize: scaleFont(22), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>{details[type].name}</Text>
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ color: colors.white, fontSize: scaleFont(13), fontFamily: constants.OPENSANS_FONT_MEDIUM, marginRight: scale(6) }}>{ismovie ? convertRunTime(details[type].runtime): `${Object.keys(details.season).length} Saison(s)` }</Text>
+                                <Text style={{ color: colors.white, fontSize: scaleFont(13), fontFamily: constants.OPENSANS_FONT_MEDIUM, marginRight: scale(6) }}>{ismovie ? convertRunTime(details[type].runtime): `${details.season? Object.keys(details.season).length: 0} Saison(s)` }</Text>
                                 <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
 
                                 <Text style={{ color: colors.white, fontSize: scaleFont(13), fontFamily: constants.OPENSANS_FONT_MEDIUM, marginHorizontal: scale(6) }}>{details[type].genre}</Text>
@@ -301,13 +302,21 @@ const PlayerScreen = (props) => {
                         </View>
 
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: scale(20), marginTop: verticalScale(10) }}>
-                            <TouchableOpacity onPress={() => props.navigation.navigate("VideoPlayer", { param1: data, param2: {
-                                    episodeId: episode ? episode.id: '',
-                                    season: selectedId
-                                } })} style={{ flexDirection: 'row', backgroundColor: colors.green, width: scale(180), height: verticalScale(40), borderRadius: verticalScale(12), justifyContent: 'center', alignItems: 'center' }}>
-                                <MaterialIcons name="play-arrow" color={colors.white} size={verticalScale(20)} />
-                                <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_BOLD }}> {getPlayTitle()} </Text>
-                            </TouchableOpacity>
+                            {
+                                ismovie || details && details.season ? (
+                                    <TouchableOpacity onPress={() => props.navigation.navigate("VideoPlayer", { param1: data, param2: {
+                                            episodeId: episode ? episode.id: '',
+                                            season: selectedId
+                                        } })} style={{ flexDirection: 'row', backgroundColor: colors.green, width: scale(180), height: verticalScale(40), borderRadius: verticalScale(12), justifyContent: 'center', alignItems: 'center' }}>
+                                        <MaterialIcons name="play-arrow" color={colors.white} size={verticalScale(20)} />
+                                        <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_BOLD }}> {getPlayTitle()} </Text>
+                                    </TouchableOpacity>
+                                ): (
+                                    <Text style={{ color: colors.green, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
+                                        Bientôt
+                                    </Text>
+                                )
+                            }
                             <TouchableOpacity onPress={() => wishlist()} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(30) }} >
                                 <FontAwesome name="heart" color={WishList ? colors.green : colors.greyColour} size={verticalScale(26)} />
                             </TouchableOpacity>

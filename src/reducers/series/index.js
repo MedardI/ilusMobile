@@ -1,6 +1,6 @@
 import {
-  MOVIE, MOVIE_FAIL, MOVIE_SUCCESS, SERIE, SERIE_FAIL, SERIE_SUCCESS,
-  SERIES_DISCOVER, SERIES_DISCOVER_FAIL, SERIES_DISCOVER_SUCCESS,
+  MOVIE, MOVIE_FAIL, MOVIE_SUCCESS, MOVIES_SUCCESS, SERIE, SERIE_FAIL, SERIE_SUCCESS,
+  SERIES_DISCOVER, SERIES_DISCOVER_FAIL, SERIES_DISCOVER_SUCCESS, SERIES_SUCCESS,
 } from "../../constants";
 import movies from "../movies";
 
@@ -27,6 +27,17 @@ const addSerie = (series, response) => {
   }
   series.push(response);
   return series;
+};
+
+const updateSeries = (state, action) => {
+  state.data = state.data.map(series => {
+    if (series.genreId === action.data.genre){
+      series.list = action.data.series;
+    }
+    return series;
+  });
+
+  return state;
 };
 
 const series = (state = initialState, action) => {
@@ -76,6 +87,11 @@ const series = (state = initialState, action) => {
           }
         },
         all: series
+      };
+    case SERIES_SUCCESS:
+      return {
+        ...state,
+        discover: updateSeries(state.discover, action),
       };
   }
 

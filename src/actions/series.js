@@ -13,7 +13,7 @@ import {
     SERIE,
     SERIE_URL,
     SERIE_WATCH_URL,
-    SERIES_RECENT_URL
+    SERIES_RECENT_URL, MOVIES_URL, MOVIES_SUCCESS, MOVIES_FAIL, SERIES_SUCCESS, SERIES_FAIL, SERIES_URL
 } from "../constants";
 
 import API from '../api';
@@ -168,3 +168,52 @@ export const serieRecentResponse = (data) => {
         data
     }
 };
+
+//============================= GET MOVIES =============================//
+
+/**
+ *
+ * @returns {{data: *, type: *}}
+ * @constructor
+ */
+export const initSeries = (response, genre) => {
+    return function (dispatch) {
+        dispatch(seriesResponse(response, genre));
+    };
+};
+
+export const initFetchSeries = (genre, genreId) => {
+    return function (dispatch) {
+        API.get(SERIES_URL(genre, 1)).then((response) => {
+            dispatch(seriesResponse(response, genreId));
+        }).catch((error) => {
+        })
+    };
+};
+
+export const getSeries = (genre, page) => {
+    return API.get(SERIES_URL(genre, page)).then((response) => {
+        return response;
+    }).catch((error) => {
+        console.log(error);
+    });
+};
+
+/**
+ *
+ * @param response
+ * @param genre
+ * @returns {{data: *, type: *}}
+ * @constructor
+ */
+export const seriesResponse = (response, genre) => {
+    return {
+        type: response.status? SERIES_SUCCESS: SERIES_FAIL,
+        data: {
+            series: response?.data?.series?.data,
+            genre
+        },
+        error: response.error
+    }
+};
+

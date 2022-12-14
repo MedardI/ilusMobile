@@ -32,6 +32,10 @@ export const SERIE_FAIL = "SERIE_FAIL";
 export const SERIE_SUCCESS = "SERIE_SUCCESS";
 export const SERIE_RECENT_SUCCESS = "SERIE_RECENT_SUCCESS";
 
+export const SERIES= "SERIES";
+export const SERIES_FAIL = "SERIES_FAIL";
+export const SERIES_SUCCESS = "SERIES_SUCCESS";
+
 //Kids
 export const KIDS_DISCOVER = "KIDS_DISCOVER";
 export const KIDS_DISCOVER_FAIL = "KIDS_DISCOVER_FAIL";
@@ -51,6 +55,7 @@ export const DISCOVER_KIDS_URL = "v1/kids/discover";
 export const GENRE_URL = "v1/misc/genres";
 export const MOVIE_URL = (id) => `v1/get/movie/${id}/`;
 export const MOVIES_URL = (genre, page = 1) => `v1/get/movies?count=50&genre=${genre}&page=${page}`;
+export const SERIES_URL = (genre, page = 1) => `v1/series?count=50&genre=${genre}&page=${page}`;
 export const SERIE_URL = (id) => `v1/get/series/${id}/`;
 export const MOVIE_WATCH_URL = `v1/get/watch/movie`;
 export const SERIE_WATCH_URL = `v1/get/watch/series`;

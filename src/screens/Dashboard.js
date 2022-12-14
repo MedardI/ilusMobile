@@ -20,7 +20,8 @@ import {
     initDiscover as initDiscoverKids
 } from "../actions/kids";
 import {
-    initDiscover as initDiscoverSeries
+    initDiscover as initDiscoverSeries,
+    initFetchSeries
 } from "../actions/series";
 import {
     initDiscover as initDiscoverMovies,
@@ -40,6 +41,7 @@ const Dashboard = (props) => {
 
     const [fetchingMovies, setFetchingMovies] = useState(false);
     const [fetchedExtraMovies, setFetchedExtraMovies] = useState(false);
+    const [fetchedExtraSeries, setFetchedExtraSeries] = useState(false);
     const [fetchingSeries, setFetchingSeries] = useState(false);
     const [fetchingKids, setFetchingKids] = useState(false);
 
@@ -47,14 +49,31 @@ const Dashboard = (props) => {
         return `${Env.cloudFront}/backdrops/${image}`;
     };
 
+    const getPosterURL = (image) => {
+        return `${Env.cloudFront}/posters/${image}`;
+    };
+
     if (props.movies.discover.fetched
-        && !fetchedExtraMovies){
+        && !fetchedExtraMovies && moviesTab){
         setFetchedExtraMovies(true);
         props.movies.discover.data.map((data) => {
             if (data.list.length < 4){
                 const genreName = allGenres[data.genre];
-                console.log(genreName);
                 props.initFetchMovies(genreName, data.genreId);
+            }
+        });
+    }
+
+    if (props.series.discover.fetched
+        && !fetchedExtraSeries && seriesTab){
+        setFetchedExtraSeries(true);
+        props.series.discover.data.map((data) => {
+            if (data.list.length < 4){
+                const genreName = allGenres[data.genre];
+                console.log(genreName);
+                if (genreName && data.genreId){
+                    props.initFetchSeries(genreName, data.genreId);
+                }
             }
         });
     }
@@ -165,7 +184,7 @@ const Dashboard = (props) => {
                                                 return (
                                                     <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image source={{
-                                                            uri: getBackDropURL(item.backdrop)
+                                                            uri: getPosterURL(item.poster)
                                                         }} style={{ height: verticalScale(80), width: scale(130), borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }} />
                                                         <View style={{ width: getRecentWidth(item.current_time, item.duration_time), borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
                                                         </View>
@@ -260,10 +279,10 @@ const Dashboard = (props) => {
                                             horizontal
                                             renderItem={({ item }) => {
                                                 return (
-                                                    <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(6) }} >
+                                                    <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen", { param: {...item, type: 'movie'} })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image
                                                             source={{
-                                                                uri: getBackDropURL(item.backdrop)
+                                                                uri: getPosterURL(item.poster)
                                                             }}
                                                             style={{ height: verticalScale(100), width: scale(80), borderRadius: verticalScale(6) }} />
                                                     </TouchableOpacity>
@@ -331,7 +350,7 @@ const Dashboard = (props) => {
                                                 return (
                                                     <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: { id: item.series_id, currentEpisode: item.episode_id } })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image  source={{
-                                                            uri: getBackDropURL(item.backdrop)
+                                                            uri: getPosterURL(item.poster)
                                                         }} style={{ height: verticalScale(80), width: scale(130), borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }} />
                                                         <View style={{ width: getRecentWidth(item.current_time, item.duration_time), borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
                                                         </View>
@@ -429,7 +448,7 @@ const Dashboard = (props) => {
                                                 return (
                                                     <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image  source={{
-                                                            uri: getBackDropURL(item.backdrop)
+                                                            uri: getPosterURL(item.poster)
                                                         }} style={{ height: verticalScale(100), width: scale(80), borderRadius: verticalScale(6) }} />
                                                     </TouchableOpacity>
                                                 )
@@ -499,7 +518,7 @@ const Dashboard = (props) => {
                                                 return (
                                                     <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image source={{
-                                                            uri: getBackDropURL(item.backdrop)
+                                                            uri: getPosterURL(item.poster)
                                                         }} style={{ height: verticalScale(80), width: scale(130), borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }} />
                                                         <View style={{ width: getRecentWidth(item.current_time, item.duration_time), borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
                                                         </View>
@@ -557,7 +576,7 @@ const Dashboard = (props) => {
                                                 return (
                                                     <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(6) }} >
                                                         <Image source={{
-                                                            uri: getBackDropURL(item.backdrop)
+                                                            uri: getPosterURL(item.poster)
                                                         }} style={{ height: verticalScale(100), width: scale(80), borderRadius: verticalScale(6) }} />
                                                     </TouchableOpacity>
                                                 )
@@ -583,7 +602,8 @@ const mapDispatchToProps = dispatch =>
         initDiscoverSeries,
         initDiscoverKids,
         initGenre,
-        initFetchMovies
+        initFetchMovies,
+        initFetchSeries
     }, dispatch);
 
 const mapStateToProps = (state)  => {
