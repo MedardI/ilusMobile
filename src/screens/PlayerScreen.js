@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, FlatList, Image, ActivityIndicator, Modal, ProgressBarAndroid } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, FlatList, Image, ActivityIndicator, Modal, ProgressBarAndroid, Button } from 'react-native';
 import AppHeader from '../components/AppHeader';
 import {colors, scale, scaleFont, verticalScale, constants, fullHeight, fullWidth} from '../utils';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import RNFS from "react-native-fs";
+import YoutubePlayer from "react-native-youtube-iframe";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { showMessage } from "react-native-flash-message";
 import Env from "../env";
@@ -15,7 +15,60 @@ import {getDatastore, isDownloaded, isVideoDownloaded, removeFile, saveDownload}
 import { download as downloadHandler, directories, checkForExistingDownloads} from 'react-native-background-downloader'
 
 
-const RenderButtons = (props, data, title, episode, selectedId) => {
+const RenderYoutubeModal = (play, id, onStateChange, togglePlaying) => {
+    return (
+        <Modal
+        animationType="slide"
+        transparent={true}
+        visible={play}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor:'rgba(255,255,255,0.8)',
+            position: 'relative'
+        }}>
+            <TouchableOpacity 
+            onPress={() => togglePlaying()}
+            style={{ flexDirection: 'row',
+                backgroundColor: colors.greyColour,
+                width: 35,
+                height: 35,
+                borderRadius: 35,
+                position: "absolute",
+                top: 15,
+                right: 10,
+                justifyContent: 'center',
+                alignItems: 'center' }}>
+                <MaterialIcons name="close" color={colors.black} size={verticalScale(20)} />
+            </TouchableOpacity>
+            
+             <View style={{
+                // flex: 1,
+                // justifyContent: "center",
+                // alignItems: "center",
+                width: fullWidth
+            }}>
+                <View>
+                    <YoutubePlayer
+                        height={300}
+                        play={play}
+                        videoId={id}
+                        onChangeState={onStateChange}
+                    />
+                </View>
+            </View>
+        </View>
+      </Modal>
+    )
+}
+
+const RenderButtons = (props, data, title, episode, selectedId, toggleTrailer) => {
     return (
         <View style={{
             flex: 1,
@@ -38,10 +91,7 @@ const RenderButtons = (props, data, title, episode, selectedId) => {
             {
                 data.trailer ?
                     (
-                        <TouchableOpacity onPress={() => props.navigation.navigate("VideoPlayer", { param1: data, param2: {
-                                episodeId: episode ? episode.id: '',
-                                season: selectedId
-                            } })} style={{ flexDirection: 'row',
+                        <TouchableOpacity onPress={() => toggleTrailer()} style={{ flexDirection: 'row',
                             backgroundColor: colors.green,
                             maxWidth: 150,
                             width: scale(150),
@@ -118,6 +168,7 @@ const PlayerScreen = (props) => {
     }
 
     const [WishList, setWishList] = useState(false);
+    const [playTrailer, setPlayTrailer] = useState(false);
     const [downloadId, setDownloadId] = useState(null);
     const [downloadProgress, setDownloadProgress] = useState(null);
     const [download, setdownload] = useState(false);
@@ -263,6 +314,17 @@ const PlayerScreen = (props) => {
                 });
             });
         }
+    };
+
+    const onYoutubeStateChange = useCallback((state) => {
+        if (state === "ended") {
+          setPlayTrailer(false);
+        }
+      }, []);
+    
+    const togglePlayingTrailer = () => {
+        console.log("Updating current youtube playback", playTrailer);
+        setPlayTrailer(!playTrailer);
     };
 
     useEffect( () => {
@@ -463,11 +525,29 @@ const PlayerScreen = (props) => {
         return Math.floor(downloadProgress * 100);
     };
 
-    console.log(details);
-
+    const getYoutubeId = () => {
+        const data = details ? details[type]: null;
+        if (data && data.trailer) {
+            const splits = data.trailer.split("/");
+            if (splits && splits.length){
+                return splits[splits.length - 1]
+            }
+        }
+        return '';
+    }
+    if (details){
+        console.log(details[type])
+        const splits = details[type].trailer.split("/");
+        console.log(splits[splits.length - 1]);
+    }
+    
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
             <SafeAreaView />
+            {
+                !loading && details && details[type].trailer ?
+                RenderYoutubeModal(playTrailer, getYoutubeId(), onYoutubeStateChange, togglePlayingTrailer): null
+            }
             <StatusBar barStyle={"light-content"} backgroundColor={"black"} hidden={false} translucent={false}
             />
             {
@@ -518,7 +598,6 @@ const PlayerScreen = (props) => {
             {
                 !loading && details ? (
                     <ScrollView showsVerticalScrollIndicator={false}>
-
                         <View style={{}}>
                             <Image source={{
                                 uri: getPosterURL(details[type].poster)
@@ -551,7 +630,7 @@ const PlayerScreen = (props) => {
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: scale(20), marginTop: verticalScale(10) }}>
                             {
                                 ismovie || details && details.season ? (
-                                    RenderButtons(props, getData(), getPlayTitle(), episode, selectedId)
+                                    RenderButtons(props, getData(), getPlayTitle(), episode, selectedId, togglePlayingTrailer)
                                 ): (
                                     <Text style={{ color: colors.green, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
                                         Bientôt
