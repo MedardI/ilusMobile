@@ -15,6 +15,7 @@ import {
 } from "../constants";
 
 import API from '../api';
+import {updateRecord} from "../api/helper";
 
 
 //============================= DISCOVER =============================//
@@ -131,7 +132,10 @@ export const initWatchMovie = (id) => {
  * @returns {{data: *, type: *}}
  * @constructor
  */
-export const initUpdateRecent = (id, duration, current) => {
+export const initUpdateRecent = (id, duration, current, localId) => {
+    if (localId){
+        updateRecord(localId, duration, current).catch();
+    }
     return function (dispatch) {
         API.post(MOVIE_RECENT_URL, {
             movie_id: id,

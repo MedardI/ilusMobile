@@ -1,30 +1,81 @@
-import React, { useState, useEffect, useRef, createRef } from 'react';
-import { Animated, View, Text, SafeAreaView, StatusBar, TouchableOpacity, Button, FlatList, Image, ScrollView } from 'react-native';
+import React, { useState, useRef, createRef } from 'react';
+import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, FlatList } from 'react-native';
+import Image from "../components/Image";
 import { colors, scaleFont, scale, verticalScale, constants } from '../utils';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { downloads, moviesdata, seriesdata } from '../utils/Data';
+import { useFocusEffect } from '@react-navigation/native';
 
-import FlashMessage, { showMessage, hideMessage } from "react-native-flash-message";
+import FlashMessage, { showMessage } from "react-native-flash-message";
 import AppHeader from '../components/AppHeader';
+import {getDatastore, getValidVideos, removeStored} from "../api/helper";
+import Env from "../env";
 
 
+
+const RenderEmptyComponent = () => {
+    return (
+        <View style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center"}}>
+            <Text style={{
+                color: colors.white,
+                textAlign: "center",
+                paddingHorizontal: 15,
+                fontSize: scaleFont(14)
+            }}>
+                Vous n'avez actuellement aucun téléchargement. Une fois que vous avez trouvé un film ou une série que vous aimez, téléchargez-le pour le visionner ultérieurement hors ligne.</Text>
+        </View>
+    )
+};
 
 const Downloads = (props) => {
 
-    const deleteitem = (item) => {
-        item.close()
+    const [downloads, setDownloads] = useState([]);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            let updated = false;
+            if (!updated){
+                getDatastore().then( async (db) => {
+                    await db.find({}, function (err, docs) {
+                        getValidVideos(docs).then((videos) => {
+                            setDownloads(videos);
+                        });
+                    });
+                });
+            }
+            return () => {
+                updated = true;
+            };
+        }, [])
+    );
+
+    const getPosterURL = (image) => {
+        return `${Env.cloudFront}/posters/${image}`;
+    };
+
+    const deleteitem = (item, pos) => {
+        item.close();
         showMessage({
             backgroundColor: colors.primary_red,
-            message: "File has been removed from downloads",
+            message: "Le téléchargement a été supprimé",
             type: "info",
-        })
-    }
+        });
+        const removed = downloads[pos];
+        removeStored({ _id: removed._id }, removed.id);
+        const data = downloads.filter(d => d.id !== removed.id);
+        setDownloads(data);
+    };
 
+    const convertRunTime = (time) => {
+        const hours = Math.floor(time / 60);
+        const min = Math.floor(time) - (hours * 60);
 
-
-
+        return `${hours}h ${min}'`;
+    };
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
@@ -37,8 +88,10 @@ const Downloads = (props) => {
 
             <View style={{ alignSelf: 'center', marginTop: verticalScale(10), flex: 1 }}>
                 <FlatList
+                    contentContainerStyle={{ flexGrow: 1 }}
                     showsVerticalScrollIndicator={false}
                     data={downloads}
+                    ListEmptyComponent={<RenderEmptyComponent/>}
                     renderItem={({ item, index }) => {
                         return (
                             <GestureHandlerRootView style={{ backgroundColor: colors.black, height: verticalScale(110), marginVertical: verticalScale(7), borderRadius: verticalScale(12) }}>
@@ -47,18 +100,18 @@ const Downloads = (props) => {
                                     renderRightActions={() => {
                                         return (
                                             <TouchableOpacity onPress={() => {
-                                                deleteitem(item)
+                                                deleteitem(item, index)
 
 
                                             }}
                                                 style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: colors.primary_red, width: scale(80), height: verticalScale(110), borderRadius: verticalScale(12), }}>
                                                 <TouchableOpacity
                                                     onPress={() => {
-                                                        deleteitem(item, item.name)
+                                                        deleteitem(item, index)
                                                     }
                                                     }
                                                     style={{ color: colors.white }}>
-                                                    <Text style={{ color: colors.white, marginLeft: scale(6), fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>Delete</Text>
+                                                    <Text style={{ color: colors.white, marginLeft: scale(6), fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>Supprimer</Text>
                                                 </TouchableOpacity>
                                             </TouchableOpacity>
                                         )
@@ -67,31 +120,55 @@ const Downloads = (props) => {
                                 >
                                     <View style={{ width: scale(340), backgroundColor: "#36454f", flexDirection: 'row', borderRadius: verticalScale(12) }}>
                                         <View style={{ borderTopLeftRadius: verticalScale(12), borderBottomLeftRadius: verticalScale(12) }}>
-                                            <Image source={item.banner} style={{ width: scale(100), height: verticalScale(110), borderTopLeftRadius: verticalScale(12), borderBottomLeftRadius: verticalScale(12) }} />
+                                            <Image source={
+                                                {
+                                                    uri: getPosterURL(item.poster)
+                                                }
+                                            } style={{ width: scale(100), height: verticalScale(110), borderTopLeftRadius: verticalScale(12), borderBottomLeftRadius: verticalScale(12) }} />
                                         </View>
-                                        <View style={{ justifyContent: 'space-between' }}>
-                                            <View style={{ marginLeft: scale(10) }}>
-                                                <Text style={{ color: colors.white, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, marginTop: verticalScale(5) }}>
-                                                    {item.name}
-                                                </Text>
-                                                <Text style={{ color: colors.aeps_borderColor, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
-                                                    {item.genre}
-                                                </Text>
-                                                <Text style={{ color: colors.aeps_borderColor, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
-                                                    {item.language}
-                                                </Text>
-                                            </View>
-
-                                            <View style={{ flexDirection: 'row', marginLeft: scale(10), marginBottom: verticalScale(5) }}>
-                                                <Text style={{ color: colors.aeps_borderColor, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, }}>
-                                                    {item.duration}
-                                                </Text>
-                                                <View style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(10) }}>
-                                                    <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
+                                        <View style={{
+                                            flexDirection: 'row',
+                                            flex:1
+                                        }}>
+                                            <View style={{ justifyContent: 'space-between' }}>
+                                                <View style={{ marginLeft: scale(10) }}>
+                                                    <Text style={{ color: colors.white, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, marginTop: verticalScale(5) }}>
+                                                        {item.name}
+                                                    </Text>
+                                                    <Text style={{ color: colors.aeps_borderColor, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
+                                                        {item.genre}
+                                                    </Text>
                                                 </View>
-                                                <Text style={{ color: colors.aeps_borderColor, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, marginLeft: scale(6) }}>
-                                                    {item.size}
-                                                </Text>
+
+                                                <View style={{ flexDirection: 'row', marginLeft: scale(10) }}>
+                                                    <Text style={{ color: colors.aeps_borderColor, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, }}>
+                                                        {convertRunTime(item.runtime)}
+                                                    </Text>
+                                                    <View style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(10) }}>
+                                                        <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
+                                                    </View>
+                                                    <Text
+                                                        style={{
+                                                            color: colors.primary_red,
+                                                            paddingLeft: 10,
+                                                            paddingTop: 2,
+                                                            fontSize: scaleFont(12),
+                                                            fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, }}>
+                                                        {`- ${item.daysLeft} jours!`}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                            <View style={{
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                backgroundColor: colors.green,
+                                            }}>
+                                                <TouchableOpacity onPress={
+                                                    () => props.navigation.navigate("VideoPlayer", { param1: downloads[index]})
+                                                } style={{ flexDirection: 'row', backgroundColor: colors.green, width: scale(120), height: verticalScale(30), borderRadius: verticalScale(12), justifyContent: 'center', alignItems: 'center' }}>
+                                                    <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_BOLD }}> JOUER </Text>
+                                                    <MaterialIcons name="play-arrow" color={colors.white} size={verticalScale(20)} />
+                                                </TouchableOpacity>
                                             </View>
                                         </View>
                                     </View>

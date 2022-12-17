@@ -20,8 +20,13 @@ const VideoPlayer = (props) => {
 
 
     const data = props?.route?.params.param1;
-    const seriesData = props?.route?.params.param2;
-    const ismovie = data?.category_type === 'movie' || data?.type === 'movie';
+    const seriesData = props?.route?.params.param2 || {};
+    let ismovie = false;
+    if (data?.category_type){
+        ismovie = data?.category_type === 'movie';
+    } else {
+        ismovie = data?.type === 'movie';
+    }
     const [playing, setPlaying] = useState(null);
     const [download, setdownload] = useState(false);
     const [fetching, setFetching] = useState(true);
@@ -39,16 +44,18 @@ const VideoPlayer = (props) => {
 
     useEffect(() => {
         if (ismovie){
-            initWatchMovie(data.id)
-                .then(response => {
-                    if (response.data?.playlist?.playlist){
-                        console.log(response.data?.playlist.playlist[0]);
-                        setPlaying(response.data?.playlist.playlist[0]);
-                    }
+            if (!data.downloaded){
+                initWatchMovie(data.id)
+                    .then(response => {
+                        if (response.data?.playlist?.playlist){
+                            console.log(response.data?.playlist.playlist[0]);
+                            setPlaying(response.data?.playlist.playlist[0]);
+                        }
+                        setFetching(false);
+                    }).catch(() => {
                     setFetching(false);
-                }).catch(() => {
-                    setFetching(false);
-            });
+                });
+            }
         } else {
             console.log("Fetching seeries data");
             initWatchSerie(data.id, seriesData.episodeId)
@@ -95,6 +102,9 @@ const VideoPlayer = (props) => {
     };
 
     const getVideoURL = () => {
+        console.log("Movie is downloaded");
+        console.log(data.downloaded);
+        if (data.downloaded) return data.url;
         return playing.sources[0].file;
     };
 
@@ -107,7 +117,7 @@ const VideoPlayer = (props) => {
     const onProgress = (progress) => {
         if (Math.floor(progress.currentTime)){
             if (ismovie){
-                props.initUpdateRecentAction(data.id, data.duration_time, Math.floor(progress.currentTime));
+                props.initUpdateRecentAction(data.id, data.duration_time ? data.duration_time : Math.floor(progress.seekableDuration), Math.floor(progress.currentTime), data._id);
             } else {
                 props.initUpdateSerieRecentAction(data.id, seriesData.episodeId, Math.floor(progress.seekableDuration), Math.floor(progress.currentTime));
             }
@@ -120,7 +130,7 @@ const VideoPlayer = (props) => {
             <StatusBar barStyle={"light-content"} backgroundColor={"black"} hidden={false} translucent={false}
             />
             {
-                fetching? (
+                fetching && !data.downloaded? (
                     <View style={{
                         flex: 1,
                         alignSelf: "center",
@@ -136,7 +146,7 @@ const VideoPlayer = (props) => {
             }
             <View style={{}} >
                 {
-                    playing ? <Video source={{ uri: getVideoURL() }}   // Can be a URL or a local file.
+                    playing || data.downloaded ? <Video source={{ uri: getVideoURL() }}   // Can be a URL or a local file.
                                      controls={true}
                                      fullscreenOrientation={"landscape"}
                                      fullscreen={false}

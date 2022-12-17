@@ -1,15 +1,111 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, FlatList, Image, ActivityIndicator } from 'react-native';
+import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, FlatList, Image, ActivityIndicator, Modal, ProgressBarAndroid } from 'react-native';
 import AppHeader from '../components/AppHeader';
 import {colors, scale, scaleFont, verticalScale, constants, fullHeight, fullWidth} from '../utils';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import RNFS from "react-native-fs";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { showMessage } from "react-native-flash-message";
 import Env from "../env";
 import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
-import {initMovie as getMovieAction} from "../actions/movies";
+import {initMovie as getMovieAction, initWatchMovie} from "../actions/movies";
 import {initSerie as getSerieAction} from "../actions/series";
+import {getDatastore, isDownloaded, isVideoDownloaded, removeFile, saveDownload} from "../api/helper";
+import { download as downloadHandler, directories, checkForExistingDownloads} from 'react-native-background-downloader'
+
+
+const RenderButtons = (props, data, title, episode, selectedId) => {
+    return (
+        <View style={{
+            flex: 1,
+            flexDirection: "row"
+        }}>
+            <TouchableOpacity onPress={() => props.navigation.navigate("VideoPlayer", { param1: data, param2: {
+                    episodeId: episode ? episode.id: '',
+                    season: selectedId
+                } })} style={{ flexDirection: 'row',
+                backgroundColor: colors.statementGreenColour,
+                maxWidth: 100,
+                width: scale(150),
+                height: verticalScale(40),
+                borderRadius: verticalScale(12),
+                justifyContent: 'center',
+                alignItems: 'center' }}>
+                <MaterialIcons name="play-arrow" color={colors.white} size={verticalScale(20)} />
+                <Text style={{ color: colors.white, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_BOLD }}> {title} </Text>
+            </TouchableOpacity>
+            {
+                data.trailer ?
+                    (
+                        <TouchableOpacity onPress={() => props.navigation.navigate("VideoPlayer", { param1: data, param2: {
+                                episodeId: episode ? episode.id: '',
+                                season: selectedId
+                            } })} style={{ flexDirection: 'row',
+                            backgroundColor: colors.green,
+                            maxWidth: 150,
+                            width: scale(150),
+                            height: verticalScale(40),
+                            borderRadius: verticalScale(12),
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginLeft: 10}}>
+                            <MaterialIcons name="play-arrow" color={colors.white} size={verticalScale(20)} />
+                            <Text style={{ color: colors.white, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_BOLD }}> Bande annonce </Text>
+                        </TouchableOpacity>
+                    ) : null
+            }
+        </View>
+
+    )
+};
+
+const RenderCasts = (casts) => {
+    return (
+        <View style={{
+            marginBottom: 25
+        }}>
+            <FlatList
+                style={{marginTop: verticalScale(10), marginHorizontal: scale(18)}}
+                data={casts}
+                horizontal
+                renderItem={({item}) => {
+                    return (
+                        <View style={{
+                            width: 90,
+                            textAlign: "center",
+                            display: "flex",
+                            alignItems: "center",
+                        }}>
+                            <TouchableOpacity activeOpacity={0.8}
+                                //onPress={() => changeMovie(item.id)}
+                                              style={{marginHorizontal: scale(6)}}>
+                                <Image source={{
+                                    uri: `https://www.ilus-cinema.com/${item.image}`
+                                }} style={{
+                                    height: verticalScale(70),
+                                    width: scale(70),
+                                    borderRadius: verticalScale(50)
+                                }}/>
+                            </TouchableOpacity>
+                            <Text
+                                numberLines={2}
+                                style={{
+                                    color: colors.white,
+                                    textAlign: "center",
+                                    fontSize: scaleFont(11),
+                                    fontFamily: constants.OPENSANS_FONT_MEDIUM,
+                                    marginHorizontal: scale(6) }}>
+                                {item.name}
+                            </Text>
+                        </View>
+                    )
+                }}
+            />
+
+        </View>
+    )
+};
 
 const PlayerScreen = (props) => {
     const data = props.route.params.param;
@@ -22,7 +118,10 @@ const PlayerScreen = (props) => {
     }
 
     const [WishList, setWishList] = useState(false);
+    const [downloadId, setDownloadId] = useState(null);
+    const [downloadProgress, setDownloadProgress] = useState(null);
     const [download, setdownload] = useState(false);
+    const [downloaded, setDownloaded] = useState(false);
     const [Clips, setClips] = useState(true);
     const [Seasons, setSeasons] = useState(true);
     const [selectedId, setSelectedId] = useState("1");
@@ -33,8 +132,34 @@ const PlayerScreen = (props) => {
     const [episode, setEpisode] = useState(null);
     const [episodeInitialised, setEpisodeInitialised] = useState(false);
     const [error, setError] = useState("");
+    const [downloadedVideo, setDownloadedVideo] = useState(null);
+    const [downloadTask, setDownloadTask] = useState(null);
+    const [checkExistingDownload, setCheckExistingDownload] = useState(true);
 
     if (!id){ setId(data.id)}
+
+    if (checkExistingDownload && !download && id){
+        checkForExistingDownloads().then((tasks) => {
+            if (tasks && tasks.length){
+                for (let task of tasks) {
+                    if (task.id === id){
+                        setdownload(true);
+                        setDownloadId(task.id);
+                        setDownloadTask(task);
+                        task.progress(percent => {
+                            onDownloadProgress(percent);
+                        }).done(() => {
+                            console.log('Downlaod is done!')
+                        }).error(error => {
+                            console.log('Download canceled due to error: ', error)
+                        })
+                    }
+                }
+            }
+        });
+        setCheckExistingDownload(false);
+    }
+
 
     const getMovie = (movieId) => {
         const dataId = movieId ? movieId : id;
@@ -50,6 +175,27 @@ const PlayerScreen = (props) => {
         }
     };
 
+    const checkIfAlreadyDownloaded = (id) => {
+        getDatastore().then((db) => {
+            db.findOne({id}, (error, record) => {
+                if (record){
+                    isVideoDownloaded(id).then((status) => {
+                        console.log("Current file status");
+                        console.log(status);
+                        setDownloaded(status);
+                        setDownloadedVideo({
+                            ...record,
+                            downloaded: true,
+                            url: `${directories.documents}/${id}`
+                        });
+                    })
+                } else {
+                    setDownloaded(false);
+                }
+            });
+        });
+    };
+
     if (loading){
         if (ismovie){
             if (!props.movies.all.fetching){
@@ -57,6 +203,7 @@ const PlayerScreen = (props) => {
                     const movie = getMovie();
                     if (movie){
                         setDetails(movie);
+                        checkIfAlreadyDownloaded(id);
                     }
                 } else {
                     setError(props.movies.all.error);
@@ -87,11 +234,13 @@ const PlayerScreen = (props) => {
                 (details.season[key]||[]).forEach(e => {
                     if (e.id === data.currentEpisode){
                         setEpisode(e);
+                        checkIfAlreadyDownloaded(e.id);
                     }
                 });
             }
             if (!episode){
                 setEpisode(details.season[key][0]);
+                checkIfAlreadyDownloaded(details.season[key][0].id);
             }
             setSelectedId(key);
             setEpisodeInitialised(true);
@@ -107,6 +256,12 @@ const PlayerScreen = (props) => {
             props.getMovieAction(movieId);
         } else {
             setDetails(movie);
+            getDatastore().then((db) => {
+                db.findOne({id: movieId}, (error, record) => {
+                    const status = record ? isVideoDownloaded(id) : false;
+                    setDownloaded(status);
+                });
+            });
         }
     };
 
@@ -119,6 +274,12 @@ const PlayerScreen = (props) => {
                     setLoading(true);
                     props.getMovieAction(id);
                 } else {
+                    getDatastore().then((db) => {
+                        db.findOne({id}, (error, record) => {
+                            const status = record ? isVideoDownloaded(id) : false;
+                            setDownloaded(status);
+                        });
+                    });
                     setDetails(movie);
                 }
             } else {
@@ -141,7 +302,13 @@ const PlayerScreen = (props) => {
         if (data.currentEpisode){
             (details.season[key]||[]).forEach(e => {
                 if (e.id === data.currentEpisode){
-                    setEpisode(e)
+                    setEpisode(e);
+                    getDatastore().then((db) => {
+                        db.findOne({id: e.id}, (error, record) => {
+                            const status = record ? isVideoDownloaded(id) : false;
+                            setDownloaded(status);
+                        });
+                    });
                 }
             });
         }
@@ -152,38 +319,99 @@ const PlayerScreen = (props) => {
         WishList ?
             showMessage({
                 backgroundColor: colors.primary_red,
-                message: "File Removed from WishList",
+                message: `${ismovie? "Film supprimé de la liste de souhaits": "Serie supprimée de la liste de souhaits"}`,
                 type: "danger"
             }) : showMessage({
                 backgroundColor: colors.green,
-                message: "File Added to WishList",
+                message: `${ismovie? "Film ajouté à la liste de souhaits": "Serie ajoutée à la liste de souhaits"}`,
                 type: "danger"
             })
 
     };
 
-    const downloaditem = () => {
+    const cancelDownload = () => {
+        if (downloadTask){
+            downloadTask.stop();
+            setDownloadTask(null);
+        }
+        showMessage({
+            backgroundColor: colors.primary_red,
+            message: "Téléchargement arrêté",
+            type: "info",
+        })
+    };
+
+    const downloaditem = async () => {
         setdownload(!download);
-        download ?
-            showMessage({
-                backgroundColor: colors.primary_red,
-                message: "Download Stopped",
-                type: "info",
-            }) : showMessage({
-                backgroundColor: colors.green,
-                message: "Download Started",
-                type: "info",
-            })
-
+        initDownload(!download).catch();
     };
 
+    const onDownloadProgress = (progress) => {
+        setDownloadProgress(progress);
+    };
+
+    const initDownload = async (download) => {
+        const data = getData();
+        const saveFile = (url, id) => {
+            saveDownload(data).catch();
+            showMessage({
+                backgroundColor: colors.green,
+                message: "Téléchargement commencé",
+                type: "info",
+            });
+            let task = downloadHandler({
+                id: id,
+                url: url,
+                destination: `${directories.documents}/${id}`,
+                metadata: {}
+            }).begin(({ expectedBytes, headers }) => {
+                console.log(`Going to download ${expectedBytes} bytes!`);
+            }).progress(percent => onDownloadProgress(percent)).done(() => {
+                console.log('Download is done!');
+                setDownloaded(true);
+                // if (Platforms.OS === 'ios')
+                //     completeHandler(jobId)
+            }).error(error => {
+                console.log('Download canceled due to error: ', error);
+            });
+            setDownloadTask(task);
+        };
+        if (download) {
+            if (ismovie){
+                initWatchMovie(data.id)
+                    .then(response => {
+                        if (response.data?.playlist?.playlist){
+                            const url = response.data?.playlist.playlist[0].sources[0].file;
+                            console.log("Downloading ");
+                            console.log(url);
+                            if (url){
+                               saveFile(url, data.id);
+                            } else {
+                                showMessage({
+                                    backgroundColor: colors.primary_red,
+                                    message: "Impossible de télécharger maintenant, veuillez réessayer plus tard",
+                                    type: "info",
+                                })
+                            }
+                        }
+                    }).catch(() => {
+                    showMessage({
+                        backgroundColor: colors.primary_red,
+                        message: "Impossible de télécharger maintenant, veuillez réessayer plus tard",
+                        type: "info",
+                    })
+                });
+            }
+        } else {
+            cancelDownload();
+        }
+    };
 
     const Item = ({ index, onPress, textColor }) => (
         <TouchableOpacity onPress={onPress} style={[{ paddingHorizontal: scale(10) }]}>
             <Text style={[{ fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, fontSize: scaleFont(14) }, textColor]}>Saison {index}</Text>
         </TouchableOpacity >
     );
-
 
 
     const renderItem = ({ item }) => {
@@ -220,7 +448,23 @@ const PlayerScreen = (props) => {
         return "JOUER";
     };
 
-    console.log(episodes);
+    const getData = () => {
+        const localData = downloadedVideo ? downloadedVideo : {};
+        if (ismovie) return {
+            ...details.movie,
+            ...localData,
+            type: 'movie'
+        };
+        else return details.serie;
+    };
+
+    const getProgressPercent = () => {
+        if (downloadProgress === null) return 0;
+        return Math.floor(downloadProgress * 100);
+    };
+
+    console.log(details);
+
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
             <SafeAreaView />
@@ -298,36 +542,57 @@ const PlayerScreen = (props) => {
                                 <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
 
                                 <Text style={{ color: colors.white, fontSize: scaleFont(13), fontFamily: constants.OPENSANS_FONT_MEDIUM, marginHorizontal: scale(6) }}>{details[type].rate}</Text>
+                                <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
+
+                                <Text style={{ color: colors.white, fontSize: scaleFont(13), fontFamily: constants.OPENSANS_FONT_MEDIUM, marginHorizontal: scale(6) }}>{details[type].age}</Text>
                             </View>
                         </View>
 
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: scale(20), marginTop: verticalScale(10) }}>
                             {
                                 ismovie || details && details.season ? (
-                                    <TouchableOpacity onPress={() => props.navigation.navigate("VideoPlayer", { param1: data, param2: {
-                                            episodeId: episode ? episode.id: '',
-                                            season: selectedId
-                                        } })} style={{ flexDirection: 'row', backgroundColor: colors.green, width: scale(180), height: verticalScale(40), borderRadius: verticalScale(12), justifyContent: 'center', alignItems: 'center' }}>
-                                        <MaterialIcons name="play-arrow" color={colors.white} size={verticalScale(20)} />
-                                        <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_BOLD }}> {getPlayTitle()} </Text>
-                                    </TouchableOpacity>
+                                    RenderButtons(props, getData(), getPlayTitle(), episode, selectedId)
                                 ): (
                                     <Text style={{ color: colors.green, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
                                         Bientôt
                                     </Text>
                                 )
                             }
-                            <TouchableOpacity onPress={() => wishlist()} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(30) }} >
+                            <TouchableOpacity onPress={() => wishlist()} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(20) }} >
                                 <FontAwesome name="heart" color={WishList ? colors.green : colors.greyColour} size={verticalScale(26)} />
                             </TouchableOpacity>
 
                             {
-                                ismovie? <TouchableOpacity onPress={() => downloaditem()} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(30) }} >
-                                    <MaterialIcons name="file-download" color={download ? colors.green : colors.greyColour} size={verticalScale(30)} />
+                                ismovie? (downloaded && !download)? <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(15) }} >
+                                    <MaterialIcons name="cloud-download" color={colors.green} size={verticalScale(30)} />
+                                </TouchableOpacity> : <TouchableOpacity onPress={() => downloaditem()} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(15) }} >
+                                    <MaterialIcons name="file-download" color={download ? colors.primary_red : colors.greyColour} size={verticalScale(30)} />
                                 </TouchableOpacity> : null
                             }
 
                         </View>
+
+                        {
+                            download ? (
+                                <View style={{
+                                    marginTop: 5,
+                                    paddingHorizontal: 10,
+                                    flex: 1,
+                                    justifyContent: "center",
+                                    backgroundColor: 'rgba(0, 0, 0, 0.9)'
+                                }}>
+                                    <ProgressBarAndroid
+                                        styleAttr="Horizontal"
+                                        indeterminate={false}
+                                        progress={downloadProgress}
+                                    />
+                                    <Text style={{
+                                        textAlign: "center",
+                                        color: colors.green,
+                                    }}> {`Téléchargement en cours: ${getProgressPercent()}%`} </Text>
+                                </View>
+                            ): null
+                        }
 
                         <View style={{ marginHorizontal: scale(20), marginTop: verticalScale(10) }}>
                             <Text style={{ color: colors.aeps_borderColor, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
@@ -336,10 +601,24 @@ const PlayerScreen = (props) => {
                         </View>
 
 
+                        {
+                            ismovie && details.casts && details.casts.length ? (
+                                <View style={{ flexDirection: 'row', marginTop: verticalScale(15), }}>
+                                    <TouchableOpacity onPress={() => { setSeasons(true) }} style={{ marginLeft: scale(20) }}>
+                                        <Text style={{ color: Clips ? colors.green : colors.greyColour, fontSize: scaleFont(16), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }} >Acteurs principaux </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            ): null
+                        }
+
+                        {
+                            ismovie && details.casts && details.casts.length?
+                                (RenderCasts(details.casts)) : null
+                        }
 
                         {
                             ismovie &&  details.similar?.length ? (
-                                <View style={{ flexDirection: 'row', marginTop: verticalScale(15), }}>
+                                <View style={{ flexDirection: 'row', marginTop: details.casts && details.casts.length? verticalScale(1) : verticalScale(15) }}>
                                     <TouchableOpacity onPress={() => { setSeasons(true) }} style={{ marginLeft: scale(20) }}>
                                         <Text style={{ color: Clips ? colors.green : colors.greyColour, fontSize: scaleFont(16), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }} >Similaire(s)</Text>
                                     </TouchableOpacity>
@@ -356,6 +635,7 @@ const PlayerScreen = (props) => {
                                 </View>
                             ): null
                         }
+
                         {
 
                             ismovie && details.similar?.length? (
@@ -388,7 +668,6 @@ const PlayerScreen = (props) => {
 
                             ): null
                         }
-
 
                         { !ismovie && episodes.length? (
                                 <View>

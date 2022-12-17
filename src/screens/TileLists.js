@@ -138,7 +138,9 @@ const TileLists = (props) => {
                 style={{ alignSelf: 'center', marginHorizontal: scale(10), marginTop: verticalScale(10) }}
                 renderItem={({ item }) => {
                     return (
-                        <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(10), marginVertical: verticalScale(10) }} >
+                        <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: type === 'movies'? {
+                            ...item, type: 'movie'
+                            }: item })} style={{ marginHorizontal: scale(10), marginVertical: verticalScale(10) }} >
                             <Image source={{
                                 uri: getPosterURL(item.poster)
                             }} style={{ height: verticalScale(120), width: scale(90), borderRadius: verticalScale(6), opacity: 0.6 }} />
