@@ -1,8 +1,9 @@
+import { act } from "react-test-renderer";
 import {
   MOVIE, MOVIE_FAIL, MOVIE_SUCCESS,
   MOVIES_DISCOVER,
   MOVIES_DISCOVER_FAIL,
-  MOVIES_DISCOVER_SUCCESS, MOVIES_SUCCESS,
+  MOVIES_DISCOVER_SUCCESS, MOVIES_SUCCESS, POST_LIKE_MOVIE_SUCCESS,
 } from "../../constants";
 
 let initialState = {
@@ -40,6 +41,38 @@ const updateMovies = (state, action) => {
 
   return state;
 };
+
+const addLikeToMovie = (state, action) => {
+  state.list = state.list.map(movie => {
+    if (movie.movie.id === action.data.id){
+      movie.movie.is_like = action.data.isLike? 1 : 0;
+    }
+    return movie;
+  })
+
+  return state;
+}
+
+const addLike = (state, action) => {
+  const updated = false;
+  state.data = state.data.map(movies => {
+    if (!updated) {
+      if (!action.data.genres
+        || !action.data.genres.length
+        || action.data.genres.includes(movies.genreId)){
+        movies.list.forEach( (element, index) => {
+          if (element.id === action.data.id){
+            element.is_like = action.data.isLike? 1 : 0;
+            movies.list[index] = element;
+          }
+        });
+      }
+    }
+    return movies;
+  });
+
+  return state;
+}
 
 const movies = (state = initialState, action) => {
   const movies = state.all;
@@ -97,6 +130,12 @@ const movies = (state = initialState, action) => {
         discover: updateMovies(state.discover, action),
         all: movies
       };
+    case POST_LIKE_MOVIE_SUCCESS:
+      return {
+        ...state,
+        discover: addLike(state.discover, action),
+        all: addLikeToMovie(state.all, action)
+      }
   }
 
   return state;

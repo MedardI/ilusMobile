@@ -41,6 +41,19 @@ export const KIDS_DISCOVER = "KIDS_DISCOVER";
 export const KIDS_DISCOVER_FAIL = "KIDS_DISCOVER_FAIL";
 export const KIDS_DISCOVER_SUCCESS = "KIDS_DISCOVER_SUCCESS";
 
+//LIKES
+export const GET_LIKES = "GET_LIKES";
+export const GET_LIKES_FAIL = "GET_LIKES_FAIL";
+export const GET_LIKES_SUCCESS = "GET_LIKES_SUCCESS";
+
+export const POST_LIKE = "POST_LIKE";
+export const POST_LIKE_FAIL = "POST_LIKE_FAIL";
+export const POST_LIKE_MOVIE_SUCCESS = "POST_LIKE_MOVIE_SUCCESS";
+export const POST_LIKE_SERIES_SUCCESS = "POST_LIKE_SERIES_SUCCESS"
+
+export const REMOVE_FROM_LIKE_LIST = "REMOVE_FROM_LIKE_LIST";
+export const REFRESH_LIKE_LIST = "REFRESH_LIKE_LIST";
+
 //Misc
 export const GENRE = "GENRE_DISCOVER";
 export const GENRE_FAIL = "GENRE_FAIL";
@@ -61,3 +74,5 @@ export const MOVIE_WATCH_URL = `v1/get/watch/movie`;
 export const SERIE_WATCH_URL = `v1/get/watch/series`;
 export const MOVIE_RECENT_URL = `v1/create/watch/movie/recently`;
 export const SERIES_RECENT_URL = `v1/create/watch/series/recently`;
+export const GET_LIKES_URL = `v1/likes`;
+export const POST_LIKE_URL = `v1/create/like`;

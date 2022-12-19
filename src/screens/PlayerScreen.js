@@ -11,8 +11,10 @@ import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
 import {initMovie as getMovieAction, initWatchMovie} from "../actions/movies";
 import {initSerie as getSerieAction} from "../actions/series";
+import {initPostLike} from "../actions/misc";
 import {getDatastore, isDownloaded, isVideoDownloaded, removeFile, saveDownload} from "../api/helper";
 import { download as downloadHandler, directories, checkForExistingDownloads} from 'react-native-background-downloader'
+import { allGenres } from '../utils/Data';
 
 
 const RenderYoutubeModal = (play, id, onStateChange, togglePlaying) => {
@@ -187,7 +189,10 @@ const PlayerScreen = (props) => {
     const [downloadTask, setDownloadTask] = useState(null);
     const [checkExistingDownload, setCheckExistingDownload] = useState(true);
 
-    if (!id){ setId(data.id)}
+    if (!id){ 
+        setId(data.id);
+        setWishList(data.is_like? true: false);
+    }
 
     if (checkExistingDownload && !download && id){
         checkForExistingDownloads().then((tasks) => {
@@ -253,6 +258,7 @@ const PlayerScreen = (props) => {
                 if (!props.movies.all.error){
                     const movie = getMovie();
                     if (movie){
+                        setWishList(movie.movie.is_like);
                         setDetails(movie);
                         checkIfAlreadyDownloaded(id);
                     }
@@ -266,6 +272,7 @@ const PlayerScreen = (props) => {
                 if (!props.series.all.error){
                     const serie = getSerie();
                     if (serie){
+                        setWishList(serie.is_like);
                         setDetails(serie);
                     }
                 } else {
@@ -306,6 +313,7 @@ const PlayerScreen = (props) => {
             setLoading(true);
             props.getMovieAction(movieId);
         } else {
+            setWishList(movie.movie.is_like);
             setDetails(movie);
             getDatastore().then((db) => {
                 db.findOne({id: movieId}, (error, record) => {
@@ -342,6 +350,7 @@ const PlayerScreen = (props) => {
                             setDownloaded(status);
                         });
                     });
+                    setWishList(movie.movie.is_like);
                     setDetails(movie);
                 }
             } else {
@@ -350,6 +359,7 @@ const PlayerScreen = (props) => {
                     setLoading(true);
                     props.getSerieAction(id);
                 } else {
+                    setWishList(serie.is_like);
                     setDetails(serie);
                 }
             }
@@ -377,6 +387,8 @@ const PlayerScreen = (props) => {
     };
 
     const wishlist = () => {
+        const data = getData();
+        props.initPostLike(!WishList, data.id, ismovie? "movie": "series", getGenreIds(), true);
         setWishList(!WishList);
         WishList ?
             showMessage({
@@ -520,6 +532,25 @@ const PlayerScreen = (props) => {
         else return details.serie;
     };
 
+    const getGenreIds = () => {
+        const data = getData();
+        const genres = props.misc.genre.list;
+        const genreNames = data.genre ? data.genre.split(','): [];
+        const genreIds = [];
+        const kind = ismovie? "movie": "series";
+        genreNames.forEach(n => {
+            const actualN = Object.keys(allGenres).find(k => {
+                return allGenres[k] === n
+            });
+            if (actualN){
+                const found = genres.find(g => g.kind === kind && g.name === actualN);
+                if (found) genreIds.push(found.id);
+            }
+            
+        })
+        return genreIds;
+    }
+
     const getProgressPercent = () => {
         if (downloadProgress === null) return 0;
         return Math.floor(downloadProgress * 100);
@@ -534,11 +565,6 @@ const PlayerScreen = (props) => {
             }
         }
         return '';
-    }
-    if (details){
-        console.log(details[type])
-        const splits = details[type].trailer.split("/");
-        console.log(splits[splits.length - 1]);
     }
     
     return (
@@ -801,7 +827,8 @@ const PlayerScreen = (props) => {
 const mapDispatchToProps = dispatch =>
     bindActionCreators({
         getMovieAction,
-        getSerieAction
+        getSerieAction,
+        initPostLike
     }, dispatch);
 
 const mapStateToProps = (state)  => {

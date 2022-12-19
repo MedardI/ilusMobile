@@ -6,13 +6,6 @@ import CustomSlider from '../containers/Carousel/CustomSlider'
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import {
     MaterialColors,
-    continuemovies,
-    genredata,
-    moviesdata,
-    carouseldataSeries,
-    continueseries,
-    MoviesData,
-    SeriesData,
     allGenres
 } from '../utils/Data';
 import {bindActionCreators} from "redux";
@@ -109,11 +102,8 @@ const Dashboard = (props) => {
     const seriesLoading = props.series.fetching;
     const kidsLoading = props.kids.fetching;
 
-    const currentMovieGenres = props.movies.discover.data.map(m => m.genreId);
-    const currentSeriesGenres = props.series.discover.data.map(m => m.genreId);
-
-    const seriesGenres = (props.misc.genre?.list || []).filter(g => g.kind === 'series' && currentSeriesGenres.includes(g.id));
-    const moviesGenres = (props.misc.genre?.list || []).filter(g => g.kind === 'movie' && currentMovieGenres.includes(g.id));
+    const seriesGenres = (props.misc.genre?.list || []).filter(g => g.kind === 'series');
+    const moviesGenres = (props.misc.genre?.list || []).filter(g => g.kind === 'movie');
 
     return (
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.93)' }}>
