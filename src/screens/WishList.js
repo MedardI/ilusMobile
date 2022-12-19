@@ -32,7 +32,36 @@ const RenderEmptyComponent = (type) => {
     )
 };
 
-const ListData = (data, getPosterURL, convertRunTime, unlike, type = "movies") => {
+const convertMovie = (data, id) => {
+    const movie = {};
+    Object.keys(data).forEach(key => {
+        if (data.hasOwnProperty(key)){
+            movie[key.replace('m_','')] = data[key];
+        }
+    });
+
+    return {
+        ...movie,
+        type: "movie",
+        id
+    }
+}
+
+const convertSerie = (data, id) => {
+    const serie = {};
+    Object.keys(data).forEach(key => {
+        if (data.hasOwnProperty(key)){
+            serie[key.replace('t_','')] = data[key];
+        }
+    });
+
+    return {
+        ...serie,
+        id
+    };
+}
+
+const ListData = (props, data, getPosterURL, convertRunTime, unlike, type = "movies") => {
     return (
         <View style={{ alignSelf: 'center', marginTop: verticalScale(10), flex: 1 }}>
         <FlatList
@@ -64,9 +93,12 @@ const ListData = (data, getPosterURL, convertRunTime, unlike, type = "movies") =
                             }}
                         >
                             <View style={{ width: scale(340), backgroundColor: "#36454f", flexDirection: 'row', borderRadius: verticalScale(12) }}>
+                            <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen",
+                                { param: data[index].movie ? convertMovie(data[index].movie, data[index].movie_id):  convertSerie(data[index].serie, data[index].series_id)})} 
+                                style={{ width: scale(340), backgroundColor: "#36454f", flexDirection: 'row', borderRadius: verticalScale(12) }} >
                                 <View style={{ borderTopLeftRadius: verticalScale(12), borderBottomLeftRadius: verticalScale(12) }}>
-                                    <Image source={{
-                                        uri: getPosterURL(item.movie? item.movie.m_poster: item.serie.t_poster)
+                                        <Image source={{
+                                            uri: getPosterURL(item.movie? item.movie.m_poster: item.serie.t_poster)
                                     }} style={{ width: scale(100), height: verticalScale(110), borderTopLeftRadius: verticalScale(12), borderBottomLeftRadius: verticalScale(12) }} />
                                 </View>
                                 <View style={{ justifyContent: 'space-between' }}>
@@ -83,9 +115,13 @@ const ListData = (data, getPosterURL, convertRunTime, unlike, type = "movies") =
                                     </View>
 
                                     <View style={{ flexDirection: 'row', marginLeft: scale(10), marginBottom: verticalScale(5) }}>
-                                        <Text style={{ color: colors.aeps_borderColor, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, }}>
-                                            {item.movie? convertRunTime(item.movie.m_runtime): convertRunTime(item.serie.t_runtime)}
-                                        </Text>
+                                        {
+                                            item.movie ? (
+                                                <Text style={{ color: colors.aeps_borderColor, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, }}>
+                                                    {item.movie? convertRunTime(item.movie.m_runtime): convertRunTime(item.serie.t_runtime)}
+                                                </Text>
+                                            ): null
+                                        }
                                         <View style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(10) }}>
                                             <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
                                         </View>
@@ -94,6 +130,7 @@ const ListData = (data, getPosterURL, convertRunTime, unlike, type = "movies") =
                                         </Text>
                                     </View>
                                 </View>
+                            </TouchableOpacity>
                             </View>
                         </Swipeable>
                     </GestureHandlerRootView>
@@ -182,9 +219,6 @@ const WishList = (props) => {
     const getLikes = (refresh = false, newType = null) => {
         let type = newType ? newType : getType();
 
-        console.log("Fetching for type");
-        console.log(type);
-
         if (type === 'movies' && !fetchingMovies){
             if (!props.misc.likes[type].list.length || refresh){
                 setFetchingMovies(true);
@@ -216,16 +250,18 @@ const WishList = (props) => {
         });
 
         let type = getType();
+        let listType = type;
         let file;
         let uuid;
         if (moviesTab){
             file = props.misc.likes.movies.list[index];
             uuid = file.movie_id;
         } else if(seriesTab){
-            file = props.misc.series.kids.list[index];
+            file = props.misc.likes.series.list[index];
             uuid = file.series_id;
         } else {
             file = props.misc.likes.kids.list[index];
+            listType = "kids";
             if (file.movie) {
                 type = "movies";
                 uuid = file.movie_id;
@@ -237,7 +273,7 @@ const WishList = (props) => {
         }
 
         if (file) {
-            props.initRemoveFromWishlist(file.id, type);
+            props.initRemoveFromWishlist(file.id, listType);
             props.initPostLike(false, uuid, type === 'movies' ? 'movie': type);
         }
     }
@@ -303,19 +339,19 @@ const WishList = (props) => {
 
             {
                 moviesTab && !fetchingMovies? (
-                   ListData(props.misc.likes.movies.list, getPosterURL, convertRunTime, unlike)
+                   ListData(props, props.misc.likes.movies.list, getPosterURL, convertRunTime, unlike)
                 ): null
             }
 
             {
                 seriesTab && !fetchingSeries? (
-                   ListData(props.misc.likes.series.list, getPosterURL, convertRunTime, unlike)
+                   ListData(props, props.misc.likes.series.list, getPosterURL, convertRunTime, unlike)
                 ): null
             }
 
             {
                 animationTab && !fetchingKids? (
-                   ListData(props.misc.likes.kids.list, getPosterURL, convertRunTime, unlike)
+                   ListData(props, props.misc.likes.kids.list, getPosterURL, convertRunTime, unlike)
                 ): null
             }
         </View>

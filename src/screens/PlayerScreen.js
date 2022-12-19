@@ -91,7 +91,7 @@ const RenderButtons = (props, data, title, episode, selectedId, toggleTrailer) =
                 <Text style={{ color: colors.white, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_BOLD }}> {title} </Text>
             </TouchableOpacity>
             {
-                data.trailer ?
+                data && data.trailer ?
                     (
                         <TouchableOpacity onPress={() => toggleTrailer()} style={{ flexDirection: 'row',
                             backgroundColor: colors.green,
@@ -529,7 +529,7 @@ const PlayerScreen = (props) => {
             ...localData,
             type: 'movie'
         };
-        else return details.serie;
+        else return details.serie ? details.serie : data;
     };
 
     const getGenreIds = () => {

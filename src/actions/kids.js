@@ -7,7 +7,9 @@ import {
     KIDS_DISCOVER,
     KIDS_DISCOVER_SUCCESS,
     KIDS_DISCOVER_FAIL,
-    DISCOVER_KIDS_URL
+    DISCOVER_KIDS_URL,
+    KIDS_URL,
+    KIDS_SUCCESS,
 } from "../constants";
 
 import API from '../api';
@@ -60,5 +62,39 @@ export const discoverResponse = (response) => {
     }
 };
 
+export const getAnimations = async (genre, page) => {
+    return API.get(KIDS_URL(genre, page)).then((response) => {
+        return response;
+    }).catch((error) => {
+        console.log(error);
+    });
+};
+
+/**
+ *
+ * @returns {{data: *, type: *}}
+ * @constructor
+ */
+ export const initKids = (response, genre) => {
+    return function (dispatch) {
+        dispatch(kidsResponse(response, genre));
+    };
+};
 
 
+/**
+ *
+ * @param response
+ * @param genre
+ * @returns {{data: *, type: *}}
+ * @constructor
+ */
+ export const kidsResponse = (movies, genre) => {
+    return {
+        type: KIDS_SUCCESS,
+        data: {
+            movies,
+            genre
+        }
+    }
+};

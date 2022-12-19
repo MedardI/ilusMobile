@@ -21,7 +21,8 @@ export const allGenres = {
     'Sport' :'Sport',
     'Thriller' :'Thriller',
     'Guerre' :'War',
-    'Religieux': "Religious"
+    'Religieux': "Religious",
+    "Medicale": "Medical"
 };
 
 export const MaterialColors = [

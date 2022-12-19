@@ -1,5 +1,5 @@
 import {
-KIDS_DISCOVER, KIDS_DISCOVER_FAIL, KIDS_DISCOVER_SUCCESS,
+KIDS_DISCOVER, KIDS_DISCOVER_FAIL, KIDS_DISCOVER_SUCCESS, KIDS_SUCCESS,
 } from "../../constants";
 
 let initialState = {
@@ -13,6 +13,17 @@ let initialState = {
     recent: []
   },
   data: [],
+};
+
+const updateMovies = (state, action) => {
+  state.data = state.data.map(movies => {
+    if (movies.genreId === action.data.genre){
+      movies.list = action.data.movies;
+    }
+    return movies;
+  });
+
+  return state;
 };
 
 const kids = (state = initialState, action) => {
@@ -43,6 +54,11 @@ const kids = (state = initialState, action) => {
             recent: action.data?.recenlty || []
           }
         }
+      };
+    case KIDS_SUCCESS:
+      return {
+        ...state,
+        discover: updateMovies(state.discover, action)
       };
   }
 

@@ -97,7 +97,7 @@ const Downloads = (props) => {
                             <GestureHandlerRootView style={{ backgroundColor: colors.black, height: verticalScale(110), marginVertical: verticalScale(7), borderRadius: verticalScale(12) }}>
                                 <Swipeable
                                     ref={ref => item = ref}
-                                    renderRightActions={() => {
+                                    renderLeftActions={() => {
                                         return (
                                             <TouchableOpacity onPress={() => {
                                                 deleteitem(item, index)

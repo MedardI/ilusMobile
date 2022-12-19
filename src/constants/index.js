@@ -41,6 +41,9 @@ export const KIDS_DISCOVER = "KIDS_DISCOVER";
 export const KIDS_DISCOVER_FAIL = "KIDS_DISCOVER_FAIL";
 export const KIDS_DISCOVER_SUCCESS = "KIDS_DISCOVER_SUCCESS";
 
+export const KIDS_SUCCESS = "KIDS_SUCCESS";
+export const KIDS_FAIL = "KIDS_FAIL";
+
 //LIKES
 export const GET_LIKES = "GET_LIKES";
 export const GET_LIKES_FAIL = "GET_LIKES_FAIL";
@@ -69,6 +72,7 @@ export const GENRE_URL = "v1/misc/genres";
 export const MOVIE_URL = (id) => `v1/get/movie/${id}/`;
 export const MOVIES_URL = (genre, page = 1) => `v1/get/movies?count=50&genre=${genre}&page=${page}`;
 export const SERIES_URL = (genre, page = 1) => `v1/series?count=50&genre=${genre}&page=${page}`;
+export const KIDS_URL = (genre, page = 1) => `v1/kids?count=50&genre=${genre}&page=${page}`;
 export const SERIE_URL = (id) => `v1/get/series/${id}/`;
 export const MOVIE_WATCH_URL = `v1/get/watch/movie`;
 export const SERIE_WATCH_URL = `v1/get/watch/series`;

@@ -102,8 +102,19 @@ const Dashboard = (props) => {
     const seriesLoading = props.series.fetching;
     const kidsLoading = props.kids.fetching;
 
+    const kidsFriendlyGenre = [
+        'Action',
+        'Aventure',
+        'Animation',
+        'Famille',
+        'Musique',
+        'Comédie',
+        'Fantaisie'
+    ];
+
     const seriesGenres = (props.misc.genre?.list || []).filter(g => g.kind === 'series');
     const moviesGenres = (props.misc.genre?.list || []).filter(g => g.kind === 'movie');
+    const kidsGenres = (props.misc.genre?.list || []).filter((g) => g.kind === 'series' && kidsFriendlyGenre.includes(g.name));
 
     return (
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.93)' }}>
@@ -265,7 +276,7 @@ const Dashboard = (props) => {
 
                                         <FlatList
                                             style={{ marginTop: verticalScale(10), }}
-                                            data={item.list}
+                                            data={item.list.slice(0,10)}
                                             horizontal
                                             renderItem={({ item }) => {
                                                 return (
@@ -432,7 +443,7 @@ const Dashboard = (props) => {
 
                                         <FlatList
                                             style={{ marginTop: verticalScale(10), }}
-                                            data={item.list}
+                                            data={item.list.slice(0,10)}
                                             horizontal
                                             renderItem={({ item }) => {
                                                 return (
@@ -534,6 +545,44 @@ const Dashboard = (props) => {
                                 :(<View/>)
                         }
 
+                        {
+                            kidsGenres.length ?
+                                (<View>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: verticalScale(15), marginHorizontal: scale(20) }}>
+                                        <Text
+                                            style={{
+                                                color: colors.white,
+                                                fontFamily: constants.OPENSANS_FONT_MEDIUM,
+                                                fontSize: scaleFont(13),
+                                                opacity: 0.7,
+                                                marginTop: verticalScale(4)
+                                            }}
+                                        >EXPLOREZ PAR GENRES </Text>
+
+                                    </View>
+
+                                    <FlatList
+                                        style={{ marginTop: verticalScale(10), marginHorizontal: scale(15) }}
+                                        horizontal
+                                        showsHorizontalScrollIndicator={false}
+                                        data={kidsGenres}
+                                        renderItem={({ item, index}) => {
+                                            return (
+                                                <TouchableOpacity
+                                                    onPress={() => props.navigation.navigate('TileList', { param1: item.name, param2: item.id, param3: 'kids' })}
+                                                    activeOpacity={0.6}
+                                                    style={{ backgroundColor: MaterialColors[index], marginHorizontal: scale(4), borderRadius: verticalScale(6), justifyContent: 'center', alignItems: 'center', paddingHorizontal: scale(7), paddingVertical: scale(7) }} >
+                                                    <Text style={{ color: colors.white, textAlignVertical: "center", fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, opacity: 0.9 }}>
+                                                        {item.name}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            )
+                                        }}
+
+                                    />
+
+                                </View>): (<View/>)
+                        }
 
                         <FlatList
                             data={props.kids.discover.data}
@@ -560,7 +609,7 @@ const Dashboard = (props) => {
 
                                         <FlatList
                                             style={{ marginTop: verticalScale(10), }}
-                                            data={item.list}
+                                            data={item.list.slice(0,10)}
                                             horizontal
                                             renderItem={({ item }) => {
                                                 return (
