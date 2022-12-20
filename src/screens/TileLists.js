@@ -65,7 +65,8 @@ const TileLists = (props) => {
         setLoaded(true);
         if (type === 'movies'){
             if (genre === 'recent'){
-
+                setData(props.movies.discover.recent);
+                setFetch(false);
             } else {
                 const movies = props.movies.discover.data;
                 if (movies){
@@ -90,7 +91,12 @@ const TileLists = (props) => {
             }
         } else if (type === 'series'){
             if (genre === 'recent'){
-
+                const series = props.series.discover.recent.map(series => ({
+                    ...series,
+                    id: series.series_id
+                }));
+                setData(series);
+                setFetch(false);
             } else {
                 const series = props.series.discover.data;
                 if (series){
@@ -117,7 +123,8 @@ const TileLists = (props) => {
             }
         } else if (type === 'kids') {
             if (genre === 'recent'){
-
+                setData(props.kids.discover.recent);
+                setFetch(false);
             } else {
                 const movies = props.kids.discover.data;
                 if (movies){
