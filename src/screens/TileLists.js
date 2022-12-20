@@ -129,12 +129,16 @@ const TileLists = (props) => {
                         const genreName = getGenre();
                         console.log(genreName);
                         getAnimations(genreName, 1).then((response) => {
-                            let movies = response.data.kids;
-                            if (movies.length){
-                                setData(movies);
-                                setFetch(false);
-                                props.initKids(movies, genre);
+                            let movies = response.data.kids.movies.data;
+                            let series = response.data.kids.series.data;
+                
+                            if (movies.length || series.length){
+                                setData([...movies, ...series]);
+                                setFetch(movies.length === 50 || series.length === 50);
+
+                                props.initKids([...movies, ...series], genre);
                             }
+
                             setLoading(false);
                         }).catch((error) => {
                             console.log(error);
@@ -196,12 +200,14 @@ const TileLists = (props) => {
                 });
             } else {
                 await getAnimations(genreName, 1).then((response) => {
-                    let movies = response.data.kids;
-                    if (movies.length){
-                        setData(movies);
-                        setFetch(false);
+                    let movies = response.data.kids.movies.data;
+                    let series = response.data.kids.series.data;
+        
+                    if (movies.length || series.length){
+                        setData([...movies, ...series]);
+                        setFetch(movies.length === 50 || series.length === 50);
 
-                        props.initKids(movies, genre);
+                        props.initKids([...movies, ...series], genre);
                     }
                 }).catch((error) => {
                     console.log(error);

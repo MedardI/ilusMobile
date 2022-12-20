@@ -355,7 +355,7 @@ const Dashboard = (props) => {
                                                         }} style={{ height: verticalScale(80), width: scale(130), borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }} />
                                                         <View style={{ width: getRecentWidth(item.current_time, item.duration_time), borderTopWidth: verticalScale(2), borderColor: colors.primary_red }}>
                                                         </View>
-                                                        <TouchableOpacity activeOpacity={0.5} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ position: 'absolute', top: verticalScale(60), left: scale(90), zIndex: 1 }}>
+                                                        <TouchableOpacity activeOpacity={0.5} onPress={() => props.navigation.navigate("PlayerScreen", { param: { id: item.series_id, currentEpisode: item.episode_id } })} style={{ position: 'absolute', top: verticalScale(60), left: scale(90), zIndex: 1 }}>
                                                             <MaterialIcons name="play-circle-outline" color={colors.green} size={verticalScale(40)} />
                                                         </TouchableOpacity>
                                                         <View style={{ width: scale(130), backgroundColor: '#303030', paddingLeft: scale(10), borderBottomLeftRadius: verticalScale(6), borderBottomRightRadius: verticalScale(6) }}>

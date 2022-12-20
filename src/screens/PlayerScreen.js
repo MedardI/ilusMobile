@@ -23,10 +23,7 @@ const RenderYoutubeModal = (play, id, onStateChange, togglePlaying) => {
         animationType="slide"
         transparent={true}
         visible={play}
-        onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
-          setModalVisible(!modalVisible);
-        }}
+        onRequestClose={() => togglePlaying()}
       >
         <View style={{
             flex: 1,
@@ -35,7 +32,7 @@ const RenderYoutubeModal = (play, id, onStateChange, togglePlaying) => {
             backgroundColor:'rgba(255,255,255,0.8)',
             position: 'relative'
         }}>
-            <TouchableOpacity 
+            <TouchableOpacity
             onPress={() => togglePlaying()}
             style={{ flexDirection: 'row',
                 backgroundColor: colors.greyColour,
@@ -49,7 +46,7 @@ const RenderYoutubeModal = (play, id, onStateChange, togglePlaying) => {
                 alignItems: 'center' }}>
                 <MaterialIcons name="close" color={colors.black} size={verticalScale(20)} />
             </TouchableOpacity>
-            
+
              <View style={{
                 // flex: 1,
                 // justifyContent: "center",
@@ -68,7 +65,7 @@ const RenderYoutubeModal = (play, id, onStateChange, togglePlaying) => {
         </View>
       </Modal>
     )
-}
+};
 
 const RenderButtons = (props, data, title, episode, selectedId, toggleTrailer) => {
     return (
@@ -189,7 +186,7 @@ const PlayerScreen = (props) => {
     const [downloadTask, setDownloadTask] = useState(null);
     const [checkExistingDownload, setCheckExistingDownload] = useState(true);
 
-    if (!id){ 
+    if (!id){
         setId(data.id);
         setWishList(data.is_like? true: false);
     }
@@ -329,9 +326,8 @@ const PlayerScreen = (props) => {
           setPlayTrailer(false);
         }
       }, []);
-    
+
     const togglePlayingTrailer = () => {
-        console.log("Updating current youtube playback", playTrailer);
         setPlayTrailer(!playTrailer);
     };
 
@@ -372,7 +368,7 @@ const PlayerScreen = (props) => {
         setEpisode(details.season[season][0]);
         setSelectedId(season);
         if (data.currentEpisode){
-            (details.season[key]||[]).forEach(e => {
+            (details.season[season]||[]).forEach(e => {
                 if (e.id === data.currentEpisode){
                     setEpisode(e);
                     getDatastore().then((db) => {
@@ -546,7 +542,7 @@ const PlayerScreen = (props) => {
                 const found = genres.find(g => g.kind === kind && g.name === actualN);
                 if (found) genreIds.push(found.id);
             }
-            
+
         })
         return genreIds;
     }
@@ -561,12 +557,13 @@ const PlayerScreen = (props) => {
         if (data && data.trailer) {
             const splits = data.trailer.split("/");
             if (splits && splits.length){
-                return splits[splits.length - 1]
+                return splits[splits.length - 1].replace("watch?v=",'');
             }
+            
         }
         return '';
     }
-    
+
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
             <SafeAreaView />
@@ -795,16 +792,26 @@ const PlayerScreen = (props) => {
                                                     } })} style={{ marginHorizontal: scale(6) }} >
                                                     <Image source={{
                                                         uri: getBackDropURL(item.backdrop)
-                                                    }} style={{ height: verticalScale(110), width: scale(130), borderRadius: verticalScale(6), opacity: 0.5 }} />
-                                                    <View style={{ flexDirection: 'row', alignItems: 'center', position: 'absolute', bottom: verticalScale(5) }}>
-                                                        <MaterialIcons name="play-arrow" color={colors.white} size={verticalScale(22)} />
+                                                    }} style={{ height: verticalScale(110), width: scale(130), borderRadius: verticalScale(6) }} />
+                                                    <View style={{
+                                                        flexDirection: 'row',
+                                                        alignItems: 'center',
+                                                        position: 'absolute',
+                                                        width: scale(130),
+                                                        backgroundColor: "rgba(255,255,255,.7)",
+                                                        bottom: verticalScale(5) }}>
+                                                        <MaterialIcons name="play-arrow" color={colors.black} size={verticalScale(22)} />
                                                         <View>
-                                                            <Text style={{ color: colors.white, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>
-                                                                S{selectedId} E{item.episode_number} </Text>
-                                                            <Text
+                                                            <Text style={{
+                                                                color: colors.black, 
+                                                                fontSize: scaleFont(12), 
+                                                                fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>
+                                                                S{selectedId} E{item.episode_number}
+                                                            </Text>
+                                                            {/* <Text
                                                                 style={{ paddingHorizontal: scale(6), color: colors.white, fontSize: scaleFont(10), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>
                                                                 {item.overview}
-                                                            </Text>
+                                                            </Text> */}
                                                         </View>
                                                     </View>
                                                 </TouchableOpacity>

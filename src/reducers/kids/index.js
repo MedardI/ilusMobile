@@ -26,6 +26,20 @@ const updateMovies = (state, action) => {
   return state;
 };
 
+const addData = (data) => {
+  const allSeries = [];
+  data.forEach(series => {
+    const found = allSeries.find(s => s.genre === series.genre);
+    if (found) {
+        found.list = [...found.list, ...series.list];
+    } else {
+        allSeries.push(series);
+    }
+  });
+
+  return allSeries;
+}
+
 const kids = (state = initialState, action) => {
   const data = state.data;
   switch (action.type) {
@@ -49,7 +63,7 @@ const kids = (state = initialState, action) => {
           error: null,
           discover: {
             fetched: true,
-            data: action.data?.data || [],
+            data: addData(action.data?.data || []),
             top: action.data?.top || [],
             recent: action.data?.recenlty || []
           }
