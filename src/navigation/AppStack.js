@@ -59,24 +59,24 @@ const AppStack = () => {
     return (
         <Stack.Navigator initialRouteName="SplashScreen"
             screenOptions={{ animation: 'slide_from_right', }} >
-            <Stack.Screen name="BottomTab" component={BottomTabNavigator} options={{ headerShown: false }} />
-            <Stack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false, animation: "fade_from_bottom" }} />
-            <Stack.Screen name="OnboardingStories" component={OnboardingStories} options={{ headerShown: false }} />
-            <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="SignupScreen" component={SignUpScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="OtpVerification" component={OtpVerification} options={{ headerShown: false }} />
-            <Stack.Screen name="Socialsignin" component={SocialSignIn} options={{ headerShown: false }} />
-            <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerShown: false }} />
-            <Stack.Screen name="SubscriptionScreen" component={SubscriptionScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="PaymentMethod" component={PaymentMethod} options={{ headerShown: false }} />
-            <Stack.Screen name="Support" component={Support} options={{ headerShown: false }} />
-            <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} options={{ headerShown: false }} />
-            <Stack.Screen name="PlayerScreen" component={PlayerScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="ReviewPage" component={ReviewPage} options={{ headerShown: false }} />
-            <Stack.Screen name="TileList" component={TileLists} options={{ headerShown: false }} />
-            <Stack.Screen name="search" component={Search} options={{ headerShown: false }} />
+            <Stack.Screen name="BottomTab" component={BottomTabNavigator} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false, animation: "fade_from_bottom", orientation: 'portrait' }} />
+            <Stack.Screen name="OnboardingStories" component={OnboardingStories} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="SignupScreen" component={SignUpScreen} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="OtpVerification" component={OtpVerification} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="Socialsignin" component={SocialSignIn} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="EditProfile" component={EditProfile} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="SubscriptionScreen" component={SubscriptionScreen} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="PaymentMethod" component={PaymentMethod} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="Support" component={Support} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="PlayerScreen" component={PlayerScreen} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="ReviewPage" component={ReviewPage} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="TileList" component={TileLists} options={{ headerShown: false, orientation: 'portrait' }} />
+            <Stack.Screen name="search" component={Search} options={{ headerShown: false, orientation: 'portrait' }} />
             <Stack.Screen name="VideoPlayer" component={VideoPlayer} options={{ headerShown: false }} />
-            <Stack.Screen name="Settings" component={Settings} options={{ headerShown: false }} />
+            <Stack.Screen name="Settings" component={Settings} options={{ headerShown: false, orientation: 'portrait' }} />
         </Stack.Navigator>
     );
 
@@ -101,7 +101,8 @@ const styles = StyleSheet.create({
             return (
                 <FontAwesome name="home" color={focused ? colors.green : colors.greyColour} size={verticalScale(20)} />
             )
-        }
+        },
+        orientation: 'portrait'
     },
     Search: {
 
@@ -115,7 +116,8 @@ const styles = StyleSheet.create({
             return (
                 <FontAwesome name="search" color={focused ? colors.green : colors.greyColour} size={verticalScale(20)} />
             )
-        }
+        },
+        orientation: 'portrait'
 
     },
     Download: {
@@ -129,8 +131,8 @@ const styles = StyleSheet.create({
             return (
                 <FontAwesome name="download" color={focused ? colors.green : colors.greyColour} size={verticalScale(20)} />
             )
-        }
-
+        },
+        orientation: 'portrait'
     },
     WishList: {
 
@@ -144,7 +146,8 @@ const styles = StyleSheet.create({
             return (
                 <FontAwesome name="heart" color={focused ? colors.green : colors.greyColour} size={verticalScale(18)} />
             )
-        }
+        },
+        orientation: 'portrait'
 
     },
     Profile: {
@@ -154,8 +157,8 @@ const styles = StyleSheet.create({
             return (
                 <FontAwesome name="user" color={focused ? colors.green : colors.greyColour} size={verticalScale(20)} />
             )
-        }
-
+        },
+        orientation: 'portrait'
     }
 
 })

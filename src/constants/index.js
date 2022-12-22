@@ -80,3 +80,4 @@ export const MOVIE_RECENT_URL = `v1/create/watch/movie/recently`;
 export const SERIES_RECENT_URL = `v1/create/watch/series/recently`;
 export const GET_LIKES_URL = `v1/likes`;
 export const POST_LIKE_URL = `v1/create/like`;
+export const SEARCH_URL = (term) => `v1/search?search=${term}`;

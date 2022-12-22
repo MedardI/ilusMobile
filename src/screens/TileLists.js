@@ -160,13 +160,6 @@ const TileLists = (props) => {
         return `${Env.cloudFront}/posters/${image}`;
     };
 
-    const convertRunTime = (time) => {
-        const hours = Math.floor(time / 60);
-        const min = Math.floor(time) - (hours * 60);
-
-        return `${hours}h ${min}'`;
-    };
-
     const load = async () => {
         let genreName = getGenre();
         let page = 1;
@@ -260,22 +253,6 @@ const TileLists = (props) => {
                                     <Image source={{
                                         uri: getPosterURL(item.poster)
                                     }} style={{ height: verticalScale(120), width: scale(90), borderRadius: verticalScale(6) }} />
-                                    {/*<View style={{ position: 'absolute', bottom: verticalScale(0), width: scale(150), backgroundColor: 'rgba(0,0,0,0.8)', borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }}>*/}
-                                    {/*    <Text style={{ marginLeft: scale(5), color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>*/}
-                                    {/*        {item.name}</Text>*/}
-                                    {/*    <View style={{ alignSelf: 'center', width: scale(140), flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>*/}
-                                    {/*        {*/}
-                                    {/*            item.runtime ? (*/}
-                                    {/*                <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>*/}
-                                    {/*                    {convertRunTime(item.runtime)}</Text>*/}
-                                    {/*            ): null*/}
-                                    {/*        }*/}
-                                    {/*        <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>*/}
-                                    {/*            {item.year}</Text>*/}
-                                    {/*    </View>*/}
-
-
-                                    {/*</View>*/}
                                 </TouchableOpacity>
                     )
                 }}

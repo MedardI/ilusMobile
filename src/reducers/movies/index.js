@@ -117,7 +117,7 @@ const movies = (state = initialState, action) => {
           error: null,
           discover: {
             fetched: true,
-            data: action.data?.data || [],
+            data: action.data?.data.sort((first, second) => (second.list.length - first.list.length)) || [],
             top: action.data?.top || [],
             recent: action.data?.recenlty || []
           }

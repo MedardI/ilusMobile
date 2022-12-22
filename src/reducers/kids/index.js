@@ -63,7 +63,7 @@ const kids = (state = initialState, action) => {
           error: null,
           discover: {
             fetched: true,
-            data: addData(action.data?.data || []),
+            data: addData(action.data?.data.sort((first, second) => (second.list.length - first.list.length)) || []),
             top: action.data?.top || [],
             recent: action.data?.recenlty || []
           }

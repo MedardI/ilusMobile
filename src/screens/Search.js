@@ -1,12 +1,73 @@
 import React, { useState, useEffect } from 'react';
-import { Animated, View, Text, SafeAreaView, StatusBar, TouchableOpacity, FlatList, Keyboard, Image, ScrollView, TextInput } from 'react-native';
+import { Animated, View, Text, SafeAreaView, StatusBar, TouchableOpacity, FlatList, Keyboard, Image, ScrollView, TextInput, ActivityIndicator } from 'react-native';
 import { colors, scaleFont, scale, verticalScale, constants } from '../utils';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { moviesdata, genredata, recentsearches, popularsearches, seriesdata } from '../utils/Data';
+import { moviesdata, genredata, recentsearches, popularsearches, fullHeight } from '../utils/Data';
+import AppHeader from '../components/AppHeader';
+import Env from "../env";
+import { initSearch } from '../actions/misc';
+
+const RenderEmptyComponent = (searchTerm) => {
+    console.log(searchTerm);
+    return (
+        <View style={{
+            flex: 1,
+            justifyContent: "flex-start"}}>
+            <Text style={{
+                color: colors.white,
+                textAlign: "center",
+                paddingHorizontal: 15,
+                fontSize: scaleFont(14)
+            }}>
+                
+            {searchTerm && searchTerm.length >=3 ? "Aucun résultat n'a été trouvé correspondant à vos critères de recherche": "Entrez 3 caractères ou plus dans le champ de recherche ci-dessus pour trouver des films, des séries, etc."}</Text>
+        </View>
+    )
+};
 
 const Search = (props) => {
+    const [loading, setLoading] = useState(false);
+    const [searching, setSearching] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [timeout, setTimeOut] = useState(null);
+    const [data, setData] = useState([]);
 
+    const getPosterURL = (image) => {
+        return `${Env.cloudFront}/posters/${image}`;
+    };
+    
+    const onSearch = (term) => {
+        setSearchTerm(term);
+        if (timeout) clearTimeout(timeout);
+    
+        if (term && term.length >= 3) {
+            if (!loading) setLoading(true);
+            setTimeOut(setTimeout(() => search(term), 500));
+        }else {
+            setData([]);
+            setLoading(false);
+        }
+    };
+    
+    const search = (term) => {
+        if (!loading && !data.length) setLoading(true);
 
+        if (!searching){
+            setSearching(true);
+            initSearch(term).then((response) => {
+                setData(response.data || []);
+            }).catch(error => {
+                setData([]);
+            })
+            .finally(() => {
+                setSearching(false);
+                setLoading(false);
+            })
+        } else {
+            if (timeout) clearTimeout(timeout);
+            setTimeOut(setTimeout(() => search(term), 500));
+        }
+    }
 
     return (
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.93)' }}>
@@ -15,7 +76,7 @@ const Search = (props) => {
                 <SafeAreaView />
                 <StatusBar barStyle={"light-content"} backgroundColor={colors.black} hidden={false} translucent={false}
                 />
-
+                <AppHeader heading={'Search'} navigation={() => props.navigation.goBack()} showicon={true} />
                 <Text
                     style={{
                         color: colors.white,
@@ -27,7 +88,7 @@ const Search = (props) => {
                         marginTop: verticalScale(10),
                     }}
                 >
-                    What'd you like</Text>
+                    Qu'aimeriez-vous</Text>
 
 
                 <Text
@@ -39,220 +100,57 @@ const Search = (props) => {
                         marginLeft: scale(20),
                         fontFamily: constants.OPENSANS_FONT_SEMI_BOLD,
                     }}
-                >to watch today? </Text>
-                <ScrollView overScrollMode="never">
-
-
-                    <View style={{ flexDirection: "row", marginHorizontal: scale(20), marginTop: verticalScale(20), borderRadius: verticalScale(6), backgroundColor: colors.black }}>
+                >regarder aujourd'hui? </Text>
+                <View style={{ flexDirection: "row", marginHorizontal: scale(20), marginTop: verticalScale(20), borderRadius: verticalScale(6), backgroundColor: colors.black }}>
                         <TouchableOpacity activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', width: scale(40), }}>
                             <MaterialIcons name='search' color={colors.green} size={verticalScale(28)} />
                         </TouchableOpacity>
                         <TextInput
+                            onChangeText={onSearch}
                             style={{ flex: 1, marginRight: scale(5), color: colors.white }}
-                            placeholder="Search Movies, Tv Series, Genre & More..."
+                            placeholder="Rechercher des films, Séries, Genre & Plus..."
                             placeholderTextColor={colors.greyColour}
                         />
                     </View>
 
-                    <View style={{ marginHorizontal: scale(20), marginTop: verticalScale(10) }}>
-
-                        <FlatList
-                            style={{}}
-                            data={popularsearches}
-                            numColumns={3}
-                            renderItem={({ item }) => {
-                                return (
-                                    <TouchableOpacity style={{ backgroundColor: '#303030', justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6), height: verticalScale(30), paddingHorizontal: scale(10), marginHorizontal: scale(5), marginVertical: verticalScale(5) }}>
-                                        <Text style={{ color: colors.white, fontSize: scaleFont(13), opacity: 0.9, fontFamily: constants.OPENSANS_FONT_BOLD }}>{item.title}</Text>
-                                    </TouchableOpacity>
-                                )
-                            }}
-
-
-                        />
-                        {/* 
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center' }}>
-                            <TouchableOpacity style={{ backgroundColor: '#303030', justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6), height: verticalScale(30), paddingHorizontal: scale(10) }}>
-                                <Text style={{ color: colors.white, fontSize: scaleFont(12), opacity: 0.6, fontFamily:constants.OPENSANS_FONT_BOLD}}>ANIMATED</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={{ backgroundColor: '#303030', justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6), height: verticalScale(30), paddingHorizontal: scale(10) }}>
-                                <Text style={{ color: colors.white, fontSize: scaleFont(12), opacity: 0.6, fontFamily:constants.OPENSANS_FONT_BOLD}}>BOLLYWOOD</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={{ backgroundColor: '#303030', justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6), height: verticalScale(30), paddingHorizontal: scale(10) }}>
-                                <Text style={{ color: colors.white, fontSize: scaleFont(12), opacity: 0.6, fontFamily:constants.OPENSANS_FONT_BOLD}}>COMEDY REVIEW</Text>
-                            </TouchableOpacity>
-                        </View> */}
-
-                        {/* <View style={{ flexDirection: 'row', justifyContent: "space-evenly", alignItems: 'center', marginTop: verticalScale(10) }}>
-                            <TouchableOpacity style={{ backgroundColor: '#303030', justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6), height: verticalScale(30), paddingHorizontal: scale(10) }}>
-                                <Text style={{ color: colors.white, fontSize: scaleFont(12), opacity: 0.6, fontFamily:constants.OPENSANS_FONT_BOLD}}>COMEDIES</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={{ backgroundColor: '#303030', justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6), height: verticalScale(30), paddingHorizontal: scale(10) }}>
-                                <Text style={{ color: colors.white, fontSize: scaleFont(12), opacity: 0.6, fontFamily:constants.OPENSANS_FONT_BOLD}}>AWARD WINNING</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={{ backgroundColor: '#303030', justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6), height: verticalScale(30), paddingHorizontal: scale(10) }}>
-                                <Text style={{ color: colors.white, fontSize: scaleFont(12), opacity: 0.6, fontFamily:constants.OPENSANS_FONT_BOLD}}>FANTASY</Text>
-                            </TouchableOpacity>
-                        </View> */}
-
-                        {/* <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', marginTop: verticalScale(10) }}>
-                            <TouchableOpacity style={{ backgroundColor: '#303030', justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6), height: verticalScale(30), paddingHorizontal: scale(10) }}>
-                                <Text style={{ color: colors.white, fontSize: scaleFont(12), opacity: 0.6, fontFamily:constants.OPENSANS_FONT_BOLD}}>CHILDREN & FAMILY</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={{ backgroundColor: '#303030', justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6), height: verticalScale(30), paddingHorizontal: scale(10) }}>
-                                <Text style={{ color: colors.white, fontSize: scaleFont(12), opacity: 0.6, fontFamily:constants.OPENSANS_FONT_BOLD}}>INTERNATIONAL</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={{ backgroundColor: '#303030', justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6), height: verticalScale(30), paddingHorizontal: scale(10) }}>
-                                <Text style={{ color: colors.white, fontSize: scaleFont(12), opacity: 0.6, fontFamily:constants.OPENSANS_FONT_BOLD}}>ANIME</Text>
-                            </TouchableOpacity>
-                        </View> */}
-
-                    </View>
-
-                    <View style={{ marginHorizontal: scale(20), marginTop: verticalScale(10) }}>
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
-                            <Text
-                                style={{
-                                    color: colors.white,
-                                    fontFamily: constants.OPENSANS_FONT_MEDIUM,
-                                    fontSize: scaleFont(13),
-                                    opacity: 0.7,
-                                    marginTop: verticalScale(4)
-                                }}
-                            >RECENTLY SEARCHED </Text>
-
-                            <TouchableOpacity activeOpacity={0.6}>
-                                <Text
-                                    style={{
-                                        marginTop: verticalScale(10),
-                                        color: colors.primary_red,
-                                        fontFamily: constants.OPENSANS_FONT_BOLD,
-                                        fontSize: scaleFont(12),
-                                        letterSpacing: 0.7,
-                                    }}
-                                >CLEAR ALL</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <FlatList
-                            style={{ marginVertical: verticalScale(10) }}
-                            data={recentsearches}
-                            renderItem={({ item }) => {
-                                return (
-                                    <TouchableOpacity style={{ flexDirection: 'row', marginVertical: verticalScale(5), alignItems: 'center', }}>
-                                        <MaterialIcons name="youtube-searched-for" color={colors.primary_red} size={verticalScale(20)} />
-                                        <Text style={{ color: colors.white, marginLeft: scale(10), textAlignVertical: "center", fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>{item.title}</Text>
-                                    </TouchableOpacity>
-                                )
-                            }}
-                        />
-
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
-                            <Text
-                                style={{
-                                    color: colors.white,
-                                    fontFamily: constants.OPENSANS_FONT_MEDIUM,
-                                    fontSize: scaleFont(13),
-                                    opacity: 0.7,
-                                    marginTop: verticalScale(4)
-                                }}
-                            >EXPLORE BY GENRES </Text>
-                        </View>
-
-                        <FlatList
-                            style={{ marginTop: verticalScale(10), }}
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            data={genredata}
-                            renderItem={({ item }) => {
-                                return (
-                                    <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: item.title, param2: moviesdata })} activeOpacity={0.6} style={{ backgroundColor: item.color, marginHorizontal: scale(4), borderRadius: verticalScale(6), justifyContent: 'center', alignItems: 'center', paddingHorizontal: scale(7), paddingVertical: scale(7) }} >
-                                        <Text style={{ color: colors.white, textAlignVertical: "center", fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_BOLD, opacity: 0.8 }}>{item.title}</Text>
-                                    </TouchableOpacity>
-                                )
-                            }}
-
-                        />
-
-
-                    </View>
 
                     <View style={{ marginTop: verticalScale(10), marginHorizontal: scale(18) }}>
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: scale(2) }}>
-                            <Text
-                                style={{
-                                    color: colors.white,
-                                    fontFamily: constants.OPENSANS_FONT_MEDIUM,
-                                    fontSize: scaleFont(13),
-                                    opacity: 0.7,
-                                    marginTop: verticalScale(4)
-                                }}
-                            >MOVIES YOU MAY LIKE</Text>
-
-                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: "Movies You May Like", param2: moviesdata })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
-                                <MaterialIcons name="chevron-right" size={verticalScale(24)} color={colors.white} />
-                            </TouchableOpacity>
-                        </View>
-
-
-                        <FlatList
-                            style={{ marginTop: verticalScale(10), }}
-                            data={moviesdata}
-                            horizontal
-                            renderItem={({ item }) => {
-                                return (
-                                    <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen", { param: item, ismovie: true })} style={{ marginHorizontal: scale(6) }} >
-                                        <Image source={item.banner} style={{ height: verticalScale(100), width: scale(80), borderRadius: verticalScale(6) }} />
-                                    </TouchableOpacity>
+                    {
+                            loading && !data.length? (
+                                <View style={{
+                                    flex: 1,
+                                    marginTop: 20,
+                                    alignSelf: "center",
+                                    justifyContent: "flex-start",
+                                    flexDirection: "row",
+                                    height: fullHeight
+                                }}>
+                                    <ActivityIndicator style={{
+                                        marginLeft: 15
+                                    }} size="large" color={colors.green}/>
+                                </View>
+                            ) : (
+                                <FlatList
+                                    data={data}
+                                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
+                                    numColumns={3}
+                                    refreshing={loading}
+                                    ListEmptyComponent={RenderEmptyComponent(searchTerm)}
+                                    style={{ alignSelf: 'center', marginHorizontal: scale(10), marginTop: verticalScale(10) }}
+                                    renderItem={({ item }) => {
+                                        return (
+                                            <TouchableOpacity activeOpacity={0.8} onPress={() => props.navigation.navigate("PlayerScreen", { param: item })} style={{ marginHorizontal: scale(10), marginVertical: verticalScale(10) }} >
+                                                <Image source={{
+                                                    uri: getPosterURL(item.poster)
+                                                }} style={{ height: verticalScale(120), width: scale(90), borderRadius: verticalScale(6) }} />
+                                            </TouchableOpacity>
                                 )
                             }}
+
                         />
-
+                            )
+                        }
                     </View>
-
-
-                    <View style={{ marginTop: verticalScale(15), marginHorizontal: scale(18) }}>
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: scale(2) }}>
-                            <Text
-                                style={{
-                                    color: colors.white,
-                                    fontFamily: constants.OPENSANS_FONT_BOLD,
-                                    fontSize: scaleFont(13),
-                                    letterSpacing: 0.7,
-                                    opacity: 0.7,
-                                    marginTop: verticalScale(4)
-                                }}
-                            >SERIES YOU MAY LIKE</Text>
-
-                            <TouchableOpacity onPress={() => props.navigation.navigate('TileList', { param1: "Movies You May Like", param2: seriesdata })} activeOpacity={0.6} style={{ justifyContent: "center", alignItems: 'center', }}>
-                                <MaterialIcons name="chevron-right" size={verticalScale(24)} color={colors.white} />
-                            </TouchableOpacity>
-                        </View>
-
-
-                        <FlatList
-                            style={{ marginTop: verticalScale(10), marginBottom: verticalScale(40), }}
-                            data={seriesdata}
-                            horizontal
-                            renderItem={({ item }) => {
-                                return (
-                                    <TouchableOpacity onPress={() => props.navigation.navigate("PlayerScreen", { param: item, ismovie: false })} style={{ marginHorizontal: scale(6) }} >
-                                        <Image source={item.banner} style={{ height: verticalScale(100), width: scale(80), borderRadius: verticalScale(6) }} />
-                                    </TouchableOpacity>
-                                )
-                            }}
-                        />
-                    </View>
-
-
-
-
-                </ScrollView>
-
             </TouchableOpacity>
         </View>
     );

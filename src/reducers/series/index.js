@@ -74,6 +74,7 @@ const series = (state = initialState, action) => {
         all: series
       };
     case SERIES_DISCOVER_SUCCESS:
+     console.log( action.data?.data );
       return {
         ...state,
         ...initialState,
@@ -81,7 +82,7 @@ const series = (state = initialState, action) => {
           error: null,
           discover: {
             fetched: true,
-            data: action.data?.data || [],
+            data: action.data?.data.sort((first, second) => (second.list.length - first.list.length)) || [],
             top: action.data?.top || [],
             recent: action.data?.recenlty || []
           }

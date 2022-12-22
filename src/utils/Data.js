@@ -22,7 +22,8 @@ export const allGenres = {
     'Thriller' :'Thriller',
     'Guerre' :'War',
     'Religieux': "Religious",
-    "Medicale": "Medical"
+    "Medicale": "Medical",
+    'Mystère': 'Mystery'
 };
 
 export const MaterialColors = [

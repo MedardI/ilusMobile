@@ -4,6 +4,7 @@ import Image from "../components/Image";
 import { colors, scale, scaleFont, verticalScale, constants } from '../utils';
 import CustomSlider from '../containers/Carousel/CustomSlider'
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import Icon from 'react-native-vector-icons/Ionicons';
 import {
     MaterialColors,
     allGenres
@@ -27,14 +28,27 @@ import {
 import {connect} from "react-redux";
 import Env from "../env";
 
+const ListBottomComponent = (props) => {
+    return (
+        <View style={{ 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            marginVertical: 10,
+            justifyContent: "center"}}>
+            <TouchableOpacity 
+            onPress={() => props.reload()}>
+                <Icon name="sync" size={verticalScale(24)} color={colors.green} />
+            </TouchableOpacity>
+        </View>
+    )
+}
+
 const Dashboard = (props) => {
     const [moviesTab, setmoviesTab] = useState(true);
     const [seriesTab, setseriesTab] = useState(false);
     const [animationTab, setanimationTab] = useState(false);
 
     const [fetchingMovies, setFetchingMovies] = useState(false);
-    const [fetchedExtraMovies, setFetchedExtraMovies] = useState(false);
-    const [fetchedExtraSeries, setFetchedExtraSeries] = useState(false);
     const [fetchingSeries, setFetchingSeries] = useState(false);
     const [fetchingKids, setFetchingKids] = useState(false);
 
@@ -45,31 +59,6 @@ const Dashboard = (props) => {
     const getPosterURL = (image) => {
         return `${Env.cloudFront}/posters/${image}`;
     };
-
-    if (props.movies.discover.fetched
-        && !fetchedExtraMovies && moviesTab){
-        setFetchedExtraMovies(true);
-        props.movies.discover.data.map((data) => {
-            if (data.list.length < 4){
-                const genreName = allGenres[data.genre];
-                props.initFetchMovies(genreName, data.genreId);
-            }
-        });
-    }
-
-    if (props.series.discover.fetched
-        && !fetchedExtraSeries && seriesTab){
-        setFetchedExtraSeries(true);
-        props.series.discover.data.map((data) => {
-            if (data.list.length < 4){
-                const genreName = allGenres[data.genre];
-                console.log(genreName);
-                if (genreName && data.genreId){
-                    props.initFetchSeries(genreName, data.genreId);
-                }
-            }
-        });
-    }
 
     useEffect( () => {
         if (!props.movies.discover.fetched && !fetchingMovies){
@@ -89,6 +78,16 @@ const Dashboard = (props) => {
             props.initGenre();
         }
     }, []);
+
+    const reload = () => {
+        setFetchingMovies(true);
+        setFetchingSeries(true);
+        setFetchingKids(true);
+        props.initDiscoverMovies();
+        props.initDiscoverSeries();
+        props.initDiscoverKids();
+        props.initGenre();
+    }
 
     const getRecentWidth = (current, total) => {
         const full = scale(130);
@@ -133,6 +132,9 @@ const Dashboard = (props) => {
                         <Text style={{ color: animationTab ? colors.green : colors.greyColour, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_BOLD }} >Jeunesse</Text>
                     </TouchableOpacity>
                 </View>
+                <TouchableOpacity onPress={() => props.navigation.navigate('search')}>
+                    <Icon name="search" size={verticalScale(24)} color={colors.white} />
+                </TouchableOpacity>
             </View>
 
 
@@ -252,6 +254,7 @@ const Dashboard = (props) => {
                         }
 
                         <FlatList
+                            ListFooterComponent={<ListBottomComponent reload={reload}/>}
                             data={props.movies.discover.data}
                             renderItem={({ item }) => {
                                 return (
@@ -419,6 +422,7 @@ const Dashboard = (props) => {
 
 
                         <FlatList
+                            ListFooterComponent={<ListBottomComponent reload={reload}/>}
                             data={props.series.discover.data}
                             renderItem={({ item }) => {
                                 return (
@@ -585,6 +589,7 @@ const Dashboard = (props) => {
                         }
 
                         <FlatList
+                            ListFooterComponent={<ListBottomComponent reload={reload}/>}
                             data={props.kids.discover.data}
                             renderItem={({ item }) => {
                                 return (
@@ -630,7 +635,6 @@ const Dashboard = (props) => {
                         )
                 )
             }
-
         </View>
     );
 };

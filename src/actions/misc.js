@@ -4,7 +4,7 @@ import  React from "react";
  * Action creators
  */
 import {
-    GENRE, GENRE_SUCCESS, GENRE_FAIL, GENRE_URL, GET_LIKES_SUCCESS, GET_LIKES_FAIL, GET_LIKES, GET_LIKES_URL, POST_LIKE_SUCCESS, POST_LIKE, POST_LIKE_URL, POST_LIKE_MOVIE_SUCCESS, POST_LIKE_SERIES_SUCCESS, REMOVE_FROM_LIKE_LIST, REFRESH_LIKE_LIST
+    GENRE, GENRE_SUCCESS, GENRE_FAIL, GENRE_URL, GET_LIKES_SUCCESS, GET_LIKES_FAIL, GET_LIKES, GET_LIKES_URL, POST_LIKE_SUCCESS, POST_LIKE, POST_LIKE_URL, POST_LIKE_MOVIE_SUCCESS, POST_LIKE_SERIES_SUCCESS, REMOVE_FROM_LIKE_LIST, REFRESH_LIKE_LIST, SEARCH_URL
 } from "../constants";
 
 import API from '../api';
@@ -202,3 +202,11 @@ const removeFromWishlist = (id, type) => {
     }
 };
 
+
+export const initSearch = async (term) => {
+    return API.get(SEARCH_URL(term)).then((response) => {
+        return response;
+    }).catch((error) => {
+        console.log(error);
+    });
+};
