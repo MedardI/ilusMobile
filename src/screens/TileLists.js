@@ -102,7 +102,7 @@ const TileLists = (props) => {
                 if (series){
                     const filteredSeries = (props.series.discover.data.filter(d => d.genreId == genre) || [])[0];
                     if (filteredSeries && filteredSeries.list.length){
-                        setData(filteredSeries?.list || []);
+                        setData(filteredSeries?.list.sort((f, s) => (new Date(s.created_at) - new Date(f.created_at))) || []);
                     }else {
                         setLoading(true);
                         const genreName = getGenre();
@@ -134,7 +134,6 @@ const TileLists = (props) => {
                     }else {
                         setLoading(true);
                         const genreName = getGenre();
-                        console.log(genreName);
                         getAnimations(genreName, 1).then((response) => {
                             let movies = response.data.kids.movies.data;
                             let series = response.data.kids.series.data;
@@ -199,15 +198,23 @@ const TileLists = (props) => {
                     console.log(error);
                 });
             } else {
-                await getAnimations(genreName, 1).then((response) => {
+                await getAnimations(genreName, page).then((response) => {
                     let movies = response.data.kids.movies.data;
                     let series = response.data.kids.series.data;
-        
+                    
                     if (movies.length || series.length){
-                        setData([...movies, ...series]);
+                        let newData = [...movies, ...series].sort((f, s) => (new Date(s.created_at) - new Date(f.created_at)));
+                        if (page > 1){
+                            setData([...data, ...newData])
+                        } else {
+                            setData(newData);
+                        }
+                        
                         setFetch(movies.length === 50 || series.length === 50);
 
-                        props.initKids([...movies, ...series], genre);
+                        if (page === 1){
+                            props.initKids(newData, genre);
+                        }
                     }
                 }).catch((error) => {
                     console.log(error);

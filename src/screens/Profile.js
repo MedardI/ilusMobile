@@ -4,8 +4,8 @@ import AppHeader from '../components/AppHeader';
 import { colors, verticalScale, scale, scaleFont, constants } from '../utils';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-
-
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
 
 
 
@@ -76,7 +76,7 @@ const Profile = (props) => {
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Image source={require("../assets/images/avatar.jpeg")} style={{ height: verticalScale(65), width: verticalScale(65), borderRadius: verticalScale(50), alignSelf: 'center', }} />
                         <View style={{ marginLeft: scale(30), height: verticalScale(50), justifyContent: 'space-between' }}>
-                            <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>Matthieu Ilunga</Text>
+                            <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>{props.auth.user.name}</Text>
                         </View>
                     </View>
 
@@ -122,4 +122,15 @@ const Profile = (props) => {
     );
 };
 
-export default Profile;
+const mapDispatchToProps = dispatch =>
+    bindActionCreators({
+        
+    }, dispatch);
+
+const mapStateToProps = (state)  => {
+    return {
+        auth: state.auth,
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Profile);

@@ -4,29 +4,79 @@ import AppHeader from '../components/AppHeader';
 import { colors, verticalScale, scale, scaleFont, constants } from '../utils';
 import { TextInput } from 'react-native-paper';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
 
+import {
+    initUpdateProfile
+} from "../actions/user";
+import { showMessage } from 'react-native-flash-message';
 
 const EditProfile = (props) => {
 
-    const [phoneNumber, sethoneNumber] = useState("912345678");
-    const [name, setname] = useState("Mark Jhonson");
-    const [email, setemail] = useState("markjhonson@email.com");
-    const Logo = require("../assets/images/LoginImage.jpeg")
-    const [disable, setdisable] = useState(true)
+    const { user } = props.auth || {};
 
-    const handlenameChange = (text) => {
-        setdisable(false)
-        setname(text)
+    const [phone, setPhone] = useState(user.phone ? user.phone : '');
+    const [name, setName] = useState(user.name);
+    const [email, setEmail] = useState(user.email);
+    const Logo = require("../assets/images/LoginImage.jpeg")
+    const [disable, setDisable] = useState(true);
+    const [updating, setUpdating] = useState(false);
+
+    if (updating && !props.auth.updating) {
+        setUpdating(false);
+        if (props.auth.profileError){
+            showMessage({
+                message: props.auth.profileError,
+                type: "danger"
+            });
+        }
     }
-    const handleemailChange = (text) => {
-        setdisable(false)
-        setemail(text)
+    const handleNameChange = (text) => {
+        setDisable(false)
+        setName(text)
+    }
+    const handleEmailChange = (text) => {
+        setDisable(false)
+        setEmail(text)
     }
     const handlePhoneChange = (text) => {
-        setdisable(false)
-        sethoneNumber(text)
+        setDisable(false)
+        setPhone(text)
     }
 
+    const isValidEmail = (email) => {
+        return /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email);
+    };
+
+    const isValidPhone = (phone) => {
+        return /^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/.test(phone);
+    };
+
+    const updateDetails = () => {
+        if (!isValidEmail(email)){
+            showMessage({
+                message: "Adresse e-mail invalide",
+                type: "danger"
+            });
+            return;
+        }
+        if (!isValidPhone(phone)) {
+            showMessage({
+                message: "Numéro de téléphone invalide",
+                type: "danger"
+            });
+            return;
+        }
+        if (phone && name && email){
+            setUpdating(true);
+            props.initUpdateProfile({
+                phone,
+                name,
+                email
+            });
+        }
+    }
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
@@ -50,7 +100,7 @@ const EditProfile = (props) => {
                         label="Nom et prénom"
                         style={{ height: verticalScale(60), width: scale(270), marginHorizontal: verticalScale(5), alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.2)', color: colors.white }}
                         keyboardType='default'
-                        onChangeText={(text) => handlenameChange(text)}
+                        onChangeText={(text) => handleNameChange(text)}
                         value={name}
                         maxLength={15}
                     />
@@ -67,7 +117,7 @@ const EditProfile = (props) => {
                         label="E-mail"
                         style={{ height: verticalScale(60), width: scale(270), alignSelf: 'center', backgroundColor: 'rgba(0,0,0,0.2)', marginVertical: verticalScale(5), color: colors.white }}
                         keyboardType="email-address"
-                        onChangeText={(text) => handleemailChange(text)}
+                        onChangeText={(text) => handleEmailChange(text)}
                         value={email}
                         maxLength={25}
                     />
@@ -83,11 +133,11 @@ const EditProfile = (props) => {
                         keyboardType="number-pad"
                         autoCapitalize='none'
                         onChangeText={(text) => handlePhoneChange(text)}
-                        value={phoneNumber}
+                        value={phone}
                         maxLength={10}
                     />
 
-                    <TouchableOpacity disabled={disable} onPress={() => props.navigation.navigate("Profile")} style={{ backgroundColor: disable ? colors.greyColour : colors.green, height: verticalScale(40), width: scale(280), alignSelf: 'center', borderRadius: verticalScale(20), marginTop: verticalScale(24), justifyContent: 'center', alignItems: 'center' }}>
+                    <TouchableOpacity disabled={disable || props.auth.updating} onPress={() => updateDetails()} style={{ backgroundColor: disable || props.auth.updating ? colors.greyColour : colors.green, height: verticalScale(40), width: scale(280), alignSelf: 'center', borderRadius: verticalScale(20), marginTop: verticalScale(24), justifyContent: 'center', alignItems: 'center' }}>
                         <Text style={{ color: colors.white, fontSize: scaleFont(16), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>Enregistrer</Text>
                     </TouchableOpacity>
 
@@ -97,4 +147,15 @@ const EditProfile = (props) => {
     );
 }
 
-export default EditProfile;
+const mapDispatchToProps = dispatch =>
+    bindActionCreators({
+        initUpdateProfile
+    }, dispatch);
+
+const mapStateToProps = (state)  => {
+    return {
+        auth: state.auth,
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(EditProfile);

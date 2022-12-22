@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import AppHeader from '../components/AppHeader';
-import {colors, constants, fullHeight, scale, scaleFont, verticalScale} from '../utils';
+import {colors, constants, fullHeight, fullWidth, scale, scaleFont, verticalScale} from '../utils';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { showMessage } from "react-native-flash-message";
 import Video from 'react-native-video';
@@ -12,13 +12,19 @@ import {
     initWatchSerie,
     initUpdateRecent as initUpdateSerieRecentAction
 } from "../actions/series";
-
+import Env from "../env";
 import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
+import { diffInDays } from '../api/helper';
+import Image from '../components/Image';
 
 const VideoPlayer = (props) => {
 
-
+    const hasUserPaid = () => {
+        const {user} = props.auth || {};
+        const diff = diffInDays(new Date(), user.period_end? new Date(user.period_end): null);
+        return diff >= 0;
+    }
     const data = props?.route?.params.param1;
     const seriesData = props?.route?.params.param2 || {};
     let ismovie = false;
@@ -30,25 +36,28 @@ const VideoPlayer = (props) => {
     const [playing, setPlaying] = useState(null);
     const [download, setdownload] = useState(false);
     const [fetching, setFetching] = useState(true);
+    const [poster, setPoster] = useState(null);
     const [player, setPlayer] = useState(null);
     const [episode, setEpisode] = useState(null);
+    const [hasPaid, setHasPaid] = useState();
     const seasoncount = 0;
     var seasonitem = [];
     for (let i = 0; i < seasoncount; i++) {
         seasonitem.push(1)
     }
 
-    console.log("logging data");
-    console.log(data, ismovie);
-    console.log(seriesData);
-
+    const payment = hasUserPaid();
+    if (payment !== hasPaid){
+        setHasPaid(payment);
+    }
+    
     useEffect(() => {
         if (ismovie){
             if (!data.downloaded){
                 initWatchMovie(data.id)
                     .then(response => {
+                        setPoster(response.data.current_movie.poster);
                         if (response.data?.playlist?.playlist){
-                            console.log(response.data?.playlist.playlist[0]);
                             setPlaying(response.data?.playlist.playlist[0]);
                         }
                         setFetching(false);
@@ -57,20 +66,14 @@ const VideoPlayer = (props) => {
                 });
             }
         } else {
-            console.log("Fetching seeries data");
             initWatchSerie(data.id, seriesData.episodeId)
                 .then(response => {
-                    console.log("Series response");
-                    console.log(response);
                     if (response.data?.playlist?.playlist){
-                        console.log(response.data.current_season);
+                        setPoster(response.data.current_episode.backdrop);
                         const episode = (response.data.current_season.filter(e => e.id === seriesData.episodeId) || [])[0];
                         if (episode){
                             setEpisode(episode);
-                            console.log(response.data?.playlist.playlist);
                             const playing = ((response.data?.playlist?.playlist || []).filter(v => v.VideoNumber === episode.episode_number) || [])[0];
-                            console.log("playing this episode");
-                            console.log(playing);
                             if (playing){
                                 setPlaying(playing);
                             }
@@ -102,8 +105,6 @@ const VideoPlayer = (props) => {
     };
 
     const getVideoURL = () => {
-        console.log("Movie is downloaded");
-        console.log(data.downloaded);
         if (data.downloaded) return data.url;
         return playing.sources[0].file;
     };
@@ -124,6 +125,13 @@ const VideoPlayer = (props) => {
         }
     };
 
+    const getPosterURL = (image) => {
+        return `${Env.cloudFront}/posters/${image}`;
+    };
+
+    console.log(hasPaid);
+    console.log(playing);
+    console.log(poster);
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
             <SafeAreaView />
@@ -146,7 +154,7 @@ const VideoPlayer = (props) => {
             }
             <View style={{}} >
                 {
-                    playing || data.downloaded ? <Video source={{ uri: getVideoURL() }}   // Can be a URL or a local file.
+                    (playing || data.downloaded) && hasPaid ? <Video source={{ uri: getVideoURL() }}   // Can be a URL or a local file.
                                      controls={true}
                                      fullscreenOrientation={"landscape"}
                                      fullscreen={false}
@@ -156,6 +164,54 @@ const VideoPlayer = (props) => {
                                      ref={ref => setPlayer(ref)}
                                      progressUpdateInterval={60000}
                                      style={{ width: scale(360), height: verticalScale(200), }} />: null
+                }
+                {
+                     (playing || data.downloaded) && !hasPaid ? (<View>
+                        <View style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "rgba(0,0,0,.7)",
+                            position: "absolute",
+                            zIndex: 1000,
+                            height: fullHeight,
+                            width: fullWidth
+                        }}>
+                            <View style={{ position: 'absolute', zIndex: 1, top: verticalScale(40) }}>
+                                <AppHeader heading="" navigation={() => props.navigation.goBack()} showicon={true} />
+                            </View>
+                            <Text
+                                style={{
+                                    backgroundColor: "rgba(255,255,255,0.8)",
+                                    padding: 10,
+                                    color: colors.black,
+                                    borderRadius: 5,
+                                    marginBottom: 15
+                                }}>
+                                    Veuillez noter que votre abonnement actuel a expiré. Si vous avez déjà effectué un paiement, il sera attribué sous peu.
+                                    Sinon, vous pouvez vous réabonner en cliquant sur le bouton ci-dessous.
+                            </Text>
+            
+                            <TouchableOpacity onPress={() => props.navigation.navigate("SubscriptionScreen", { })} style={{ flexDirection: 'row',
+                            backgroundColor: colors.statementGreenColour,
+                            maxWidth: 100,
+                            width: scale(150),
+                            height: verticalScale(40),
+                            borderRadius: verticalScale(12),
+                            justifyContent: 'center',
+                            alignItems: 'center' }}>
+                            <Text style={{ color: colors.white, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_BOLD }}> Se Réabonner </Text>
+                        </TouchableOpacity>
+                        
+                        </View>
+                        <Image source={{
+                                    uri: poster
+                                }} style={{
+                                    height: fullHeight,
+                                    width: fullWidth,
+                                    borderRadius: verticalScale(6)
+                                }}/>
+                     </View>): null
                 }
             </View>
             <View style={{ position: 'absolute', zIndex: 1, top: verticalScale(40) }}>
@@ -213,8 +269,10 @@ const mapDispatchToProps = dispatch =>
         initUpdateSerieRecentAction
     }, dispatch);
 
-const mapStateToProps = ()  => {
-    return {}
+const mapStateToProps = (state)  => {
+    return {
+        auth: state.auth
+    }
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(VideoPlayer);

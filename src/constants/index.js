@@ -62,7 +62,12 @@ export const GENRE = "GENRE_DISCOVER";
 export const GENRE_FAIL = "GENRE_FAIL";
 export const GENRE_SUCCESS = "GENRE_SUCCESS";
 
-    // URLs
+//User
+export const PROFILE = "PROFILE";
+export const PROFILE_FAIL = "PROFILE_FAIL";
+export const PROFILE_SUCCESS = "PROFILE_SUCCESS";
+
+// URLs
 export const LOGIN_URL = "v1/login";
 export const TOKEN_LOGIN_URL = "v1/token";
 export const DISCOVER_MOVIES_URL = "v1/movies/discover";
@@ -81,3 +86,4 @@ export const SERIES_RECENT_URL = `v1/create/watch/series/recently`;
 export const GET_LIKES_URL = `v1/likes`;
 export const POST_LIKE_URL = `v1/create/like`;
 export const SEARCH_URL = (term) => `v1/search?search=${term}`;
+export const PROFILE_URL = `v1/update/profile/details`;

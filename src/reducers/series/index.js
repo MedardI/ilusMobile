@@ -74,7 +74,6 @@ const series = (state = initialState, action) => {
         all: series
       };
     case SERIES_DISCOVER_SUCCESS:
-     console.log( action.data?.data );
       return {
         ...state,
         ...initialState,

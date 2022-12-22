@@ -435,9 +435,8 @@ const PlayerScreen = (props) => {
                 destination: `${directories.documents}/${id}`,
                 metadata: {}
             }).begin(({ expectedBytes, headers }) => {
-                console.log(`Going to download ${expectedBytes} bytes!`);
+                
             }).progress(percent => onDownloadProgress(percent)).done(() => {
-                console.log('Download is done!');
                 setDownloaded(true);
                 // if (Platforms.OS === 'ios')
                 //     completeHandler(jobId)
@@ -452,8 +451,6 @@ const PlayerScreen = (props) => {
                     .then(response => {
                         if (response.data?.playlist?.playlist){
                             const url = response.data?.playlist.playlist[0].sources[0].file;
-                            console.log("Downloading ");
-                            console.log(url);
                             if (url){
                                saveFile(url, data.id);
                             } else {

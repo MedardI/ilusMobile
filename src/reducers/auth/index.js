@@ -2,7 +2,7 @@ import {
   LOGIN,
   LOGIN_FAIL,
   LOGIN_SUCCESS,
-  LOG_OUT, TOKEN_FAIL,
+  LOG_OUT, PROFILE, PROFILE_FAIL, PROFILE_SUCCESS, TOKEN_FAIL,
 } from "../../constants";
 
 let initialState = {
@@ -13,7 +13,9 @@ let initialState = {
   loginError: null,
   registerError: null,
   user: null,
-  tokenLoginFail: false
+  tokenLoginFail: false,
+  updating: false,
+  profileError: null,
 };
 
 const auth = (state = initialState, action) => {
@@ -22,6 +24,12 @@ const auth = (state = initialState, action) => {
       return {...state,...initialState, ...{loggingIn: true, mode: state.mode}};
     case LOG_OUT:
       return {...state,...{loggingIn: false, loggedIn: false}};
+    case PROFILE:
+      return {...state,...{updating: true, profileError: null}};
+    case PROFILE_SUCCESS:
+      return {...state,...{updating: false, user: action.data.user}};
+    case PROFILE_FAIL:
+      return {...state,...{updating: false, profileError: action.error}};
     case LOGIN_FAIL:
       return {
         ...state,

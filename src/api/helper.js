@@ -93,6 +93,7 @@ export const updateRecord = async (id, duration_time, current_time) => {
 };
 
 export const diffInDays = (date1, date2) => {
+    if (!date2) return -1;
     const Difference_In_Time = date2.getTime() - date1.getTime();
     return Math.floor(Difference_In_Time / (1000 * 3600 * 24));
 };
