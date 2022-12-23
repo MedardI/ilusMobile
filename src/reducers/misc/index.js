@@ -1,12 +1,18 @@
 import { stat } from "react-native-fs";
 import {
-  GENRE, GENRE_FAIL, GENRE_SUCCESS, GET_LIKES, GET_LIKES_FAIL, GET_LIKES_SUCCESS, REFRESH_LIKE_LIST, REMOVE_FROM_LIKE_LIST,
+  GENRE, GENRE_FAIL, GENRE_SUCCESS, GET_LIKES, GET_LIKES_FAIL, GET_LIKES_SUCCESS, PAYMENT_METHODS, PAYMENT_METHODS_FAIL, PAYMENT_METHODS_SUCCESS, REFRESH_LIKE_LIST, REMOVE_FROM_LIKE_LIST,
 } from "../../constants";
 
 let initialState = {
   genre: {
     fetching: false,
     list: []
+  },
+  paymentMethods: {
+    packages: [],
+    methods: [],
+    fetching: false,
+    error: null,
   },
   likes: {
     movies: {
@@ -51,34 +57,59 @@ const misc = (state = initialState, action) => {
           list: action.data.genres,
         }
       };
-      case GET_LIKES:
-        const likes = state.likes;
-        likes[action.data.type] = {
+    case PAYMENT_METHODS:
+      return {...state, paymentMethods: {
+          ...state.paymentMethods,
           fetching: true,
-          list: likes[action.data.type].list
+          error: null
+        }};
+    case PAYMENT_METHODS_FAIL:
+      return {
+        ...state,
+        paymentMethods: {
+          ...state.paymentMethods,
+          fetching: false,
+          error: action.error,
         }
-        return {
-          ...state,
-          likes
-        };
-      case GET_LIKES_FAIL:
-        return {
-          ...state,
-        };
-      case GET_LIKES_SUCCESS:
-        let allLikes = null;
-        if (!action.data.refresh){
-          allLikes = state.likes;
-          allLikes[action.data.type] = {
-            fetching: false,
-            refresh: false,
-            list: action.data.data
-          }
+      };
+    case PAYMENT_METHODS_SUCCESS:
+      return {
+        ...state,
+        paymentMethods: {
+          packages: action.data.packages,
+          methods: action.data.methods,
+          fetching: false,
+          error: null,
         }
-        return {
-          ...state,
-          likes: allLikes
-        };
+      };
+    case GET_LIKES:
+      const likes = state.likes;
+      likes[action.data.type] = {
+        fetching: true,
+        list: likes[action.data.type].list
+      }
+      return {
+        ...state,
+        likes
+      };
+    case GET_LIKES_FAIL:
+      return {
+        ...state,
+      };
+    case GET_LIKES_SUCCESS:
+      let allLikes = null;
+      if (!action.data.refresh){
+        allLikes = state.likes;
+        allLikes[action.data.type] = {
+          fetching: false,
+          refresh: false,
+          list: action.data.data
+        }
+      }
+      return {
+        ...state,
+        likes: allLikes
+      };
       case REFRESH_LIKE_LIST:
         let nonRefreshed = state.likes;
         nonRefreshed[action.data.type] = {

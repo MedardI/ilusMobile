@@ -21,9 +21,9 @@ let initialState = {
 const auth = (state = initialState, action) => {
   switch (action.type) {
     case LOGIN:
-      return {...state,...initialState, ...{loggingIn: true, mode: state.mode}};
+      return {...state,...initialState, ...{loggingIn: true}};
     case LOG_OUT:
-      return {...state,...{loggingIn: false, loggedIn: false}};
+      return {...state,...initialState};
     case PROFILE:
       return {...state,...{updating: true, profileError: null}};
     case PROFILE_SUCCESS:

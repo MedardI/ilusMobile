@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import { View, SafeAreaView, StatusBar, Text, TouchableOpacity, Image, Modal } from 'react-native';
-import AppHeader from '../components/AppHeader';
 import { colors, verticalScale, scale, scaleFont, constants } from '../utils';
-import FontAwesome from "react-native-vector-icons/FontAwesome";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
-
-
-
+import { initLogout } from "../actions/login";
 
 const Profile = (props) => {
 
@@ -16,7 +12,15 @@ const Profile = (props) => {
 
     const handlelogout = () => {
         showModal()
-        //  props.navigation.navigate("LoginScreen")
+    }
+
+    const logOut = () => {
+        props.initLogout();
+
+        props.navigation.reset({
+            index: 0,
+            routes: [{ name: 'OnboardingStories' }],
+        });
     }
 
     const [visible, setVisible] = useState(false);
@@ -49,7 +53,7 @@ const Profile = (props) => {
                                     <Text style={{ alignSelf: 'center', color: colors.green, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_BOLD, marginRight: scale(15) }}>
                                         Non</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => props.navigation.navigate("LoginScreen")} style={{ justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6) }}>
+                                <TouchableOpacity onPress={() => logOut()} style={{ justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6) }}>
                                     <Text style={{ alignSelf: 'center', color: colors.primary_red, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_BOLD, }}>
                                         Oui</Text>
                                 </TouchableOpacity>
@@ -76,7 +80,7 @@ const Profile = (props) => {
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Image source={require("../assets/images/avatar.jpeg")} style={{ height: verticalScale(65), width: verticalScale(65), borderRadius: verticalScale(50), alignSelf: 'center', }} />
                         <View style={{ marginLeft: scale(30), height: verticalScale(50), justifyContent: 'space-between' }}>
-                            <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>{props.auth.user.name}</Text>
+                            <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>{props.auth?.user?.name}</Text>
                         </View>
                     </View>
 
@@ -124,7 +128,7 @@ const Profile = (props) => {
 
 const mapDispatchToProps = dispatch =>
     bindActionCreators({
-        
+        initLogout
     }, dispatch);
 
 const mapStateToProps = (state)  => {

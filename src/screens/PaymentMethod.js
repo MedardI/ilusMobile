@@ -4,7 +4,13 @@ import AppHeader from '../components/AppHeader';
 import { colors, constants, scale, scaleFont, verticalScale } from '../utils';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
 
+const orangeLogo = require('../assets/images/orange-money.jpeg');
+const mpesaLogo = require('../assets/images/mpesa.jpeg');
+const airtelLogo = require('../assets/images/airtel.png');
+const defaultLogo = require('../assets/images/creditcard.jpeg');
 
 const PaymentMethod = (props) => {
 
@@ -13,14 +19,42 @@ const PaymentMethod = (props) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [method, setMethod] = useState('');
 
-    const initPayment = (method) => {
+    const initPayment = (code) => {
+        const methods = getMethods();
+        const method = methods.filter(m => m.code === code)[0];
         setMethod(method);
         setModalVisible(true);
     }
 
-    const getNumber = () => {
+    const getMethods = () => {
+        const methods = props.misc.paymentMethods.methods;
+        if (methods && Object.keys(methods).length){
+            const all = [];
+            Object.keys(methods).forEach(key => {
+                if (methods.hasOwnProperty(key) && !methods.disabled){
+                    all.push({
+                        ...methods[key],
+                        code: key
+                    });
+                }
+            })
 
+            return all;
+        }
+
+        return [];
     }
+
+    const getImage = (code) => {
+        const images = {
+            mpesa: mpesaLogo,
+            airtel: airtelLogo,
+            orange: orangeLogo
+        }
+
+        return images[code] || defaultLogo;
+    }
+
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
@@ -47,29 +81,22 @@ const PaymentMethod = (props) => {
             Sélectionnez votre méthode de paiement
             </Text>
 
-            <TouchableOpacity onPress={() => initPayment("mpesa")} activeOpacity={0.8} style={{ flexDirection: 'row', width: scale(320), alignSelf: 'center', height: verticalScale(50), alignItems: 'center' }}>
-                <Image source={require("../assets/images/mpesa.jpeg")} style={{ width: scale(60), height: verticalScale(25), borderRadius: verticalScale(3) }} />
-                <Text style={{ color: colors.white, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_BOLD, width: scale(220), marginLeft: scale(15) }}>M-Pesa</Text>
-                <FontAwesome name="angle-right" color={colors.white} size={verticalScale(24)} />
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => initPayment("airtel")} activeOpacity={0.8} style={{ flexDirection: 'row', width: scale(320), alignSelf: 'center', height: verticalScale(50), alignItems: 'center' }}>
-                <Image source={require("../assets/images/airtel.png")} style={{ width: scale(60), height: verticalScale(25), borderRadius: verticalScale(3) }} />
-                <Text style={{ color: colors.white, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_BOLD, width: scale(220), marginLeft: scale(15) }}>Airtel Money</Text>
-                <FontAwesome name="angle-right" color={colors.white} size={verticalScale(24)} />
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => initPayment('orange')} activeOpacity={0.8} style={{ flexDirection: 'row', width: scale(320), alignSelf: 'center', height: verticalScale(50), alignItems: 'center' }}>
-                <Image source={require("../assets/images/orange-money.jpeg")} style={{ width: scale(60), height: verticalScale(25), resizeMode: "contain", backgroundColor: colors.white, borderRadius: verticalScale(3) }} />
-                <Text style={{ color: colors.white, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_BOLD, width: scale(220), marginLeft: scale(15), }}>Orange Money</Text>
-                <FontAwesome name="angle-right" color={colors.white} size={verticalScale(24)} />
-            </TouchableOpacity>
+            {getMethods().map((method) => {
+                return (
+                    <TouchableOpacity key={method.code} onPress={() => initPayment(method.code)} activeOpacity={0.8} style={{ flexDirection: 'row', width: scale(320), alignSelf: 'center', height: verticalScale(50), alignItems: 'center' }}>
+                        <Image source={getImage(method.code)} style={{ width: scale(60), height: verticalScale(25), borderRadius: verticalScale(3) }} />
+                        <Text style={{ color: colors.white, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_BOLD, width: scale(220), marginLeft: scale(15) }}>{method.name}</Text>
+                        <FontAwesome name="angle-right" color={colors.white} size={verticalScale(24)} />
+                    </TouchableOpacity>
+    
+                );
+            })}
 
             <Modal visible={modalVisible} >
                 <TouchableOpacity activeOpacity={.9} style={{ flex: 1, alignItems: 'center', backgroundColor: "rgba(0,0,0,0.8)" }}>
                     <View style={{ backgroundColor: colors.black, height: verticalScale(360), width: scale(300), borderRadius: verticalScale(12), marginTop: verticalScale(100) }}>
                         <View style={{ alignSelf: 'center', alignItems: 'center', marginTop: verticalScale(30) }}>
-                            <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_BOLD, textAlign: 'center' }}>{`Veuillez transférer ${data.amount} pour un abonnement de ${data.duration} sur notre portefeuille mpesa en utilisant les informations suivantes:`}</Text>
+                            <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_BOLD, textAlign: 'center' }}>{`Veuillez transférer ${data.amount} pour un abonnement de ${data.duration} sur notre portefeuille ${method.name} en utilisant les informations suivantes:`}</Text>
 
                             <View  style={{
                                 display: 'flex',
@@ -86,7 +113,7 @@ const PaymentMethod = (props) => {
                                     Nom:
                                 </Text>
                                 <Text style={{ color: "#00FF00", fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_BOLD, textAlign: 'center', marginTop: verticalScale(10) }}>
-                                    Mathieu Ilunga
+                                   {method.owner}
                                 </Text>
                             </View>
                             
@@ -106,7 +133,7 @@ const PaymentMethod = (props) => {
                                 </Text>
 
                                 <Text style={{ color: "#00FF00", fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_BOLD, textAlign: 'center', marginTop: verticalScale(5) }}>
-                                    097 8181 762
+                                    {method.number}
                                 </Text>
                             </View>
                             
@@ -132,4 +159,14 @@ const PaymentMethod = (props) => {
     );
 }
 
-export default PaymentMethod;
+const mapDispatchToProps = dispatch =>
+    bindActionCreators({
+    }, dispatch);
+
+const mapStateToProps = (state)  => {
+    return {
+        misc: state.misc,
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(PaymentMethod);

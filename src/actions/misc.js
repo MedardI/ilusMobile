@@ -4,7 +4,7 @@ import  React from "react";
  * Action creators
  */
 import {
-    GENRE, GENRE_SUCCESS, GENRE_FAIL, GENRE_URL, GET_LIKES_SUCCESS, GET_LIKES_FAIL, GET_LIKES, GET_LIKES_URL, POST_LIKE_SUCCESS, POST_LIKE, POST_LIKE_URL, POST_LIKE_MOVIE_SUCCESS, POST_LIKE_SERIES_SUCCESS, REMOVE_FROM_LIKE_LIST, REFRESH_LIKE_LIST, SEARCH_URL
+    GENRE, GENRE_SUCCESS, GENRE_FAIL, GENRE_URL, GET_LIKES_SUCCESS, GET_LIKES_FAIL, GET_LIKES, GET_LIKES_URL, POST_LIKE_SUCCESS, POST_LIKE, POST_LIKE_URL, POST_LIKE_MOVIE_SUCCESS, POST_LIKE_SERIES_SUCCESS, REMOVE_FROM_LIKE_LIST, REFRESH_LIKE_LIST, SEARCH_URL, PAYMENT_METHODS_SUCCESS, PAYMENT_METHODS_FAIL, PAYMENT_METHODS, PAYMENT_METHODS_URL
 } from "../constants";
 
 import API from '../api';
@@ -209,4 +209,51 @@ export const initSearch = async (term) => {
     }).catch((error) => {
         console.log(error);
     });
+};
+
+//============================= PAYMENT METHODS =============================//
+
+/**
+ *
+ * @returns {{data: *, type: *}}
+ * @constructor
+ */
+ export const initPaymentMethods = () => {
+
+    return function (dispatch) {
+
+        dispatch(paymentMethods());
+
+        API.get(PAYMENT_METHODS_URL).then((response) => {
+            dispatch(paymentMethodsResponse(response));
+        }).catch((error) => {
+            console.log(error);
+        })
+    };
+};
+
+/**
+ *
+ * @returns {{type: *}}
+ *
+ * @constructor
+ */
+const paymentMethods = () => {
+    return {
+        type: PAYMENT_METHODS,
+    }
+};
+
+/**
+ *
+ * @param response
+ * @returns {{data: *, type: *}}
+ * @constructor
+ */
+export const paymentMethodsResponse = (response) => {
+    return {
+        type: response? PAYMENT_METHODS_SUCCESS: PAYMENT_METHODS_FAIL,
+        data: response,
+        error: response.error
+    }
 };

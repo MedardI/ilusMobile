@@ -22,9 +22,10 @@ const VideoPlayer = (props) => {
 
     const hasUserPaid = () => {
         const {user} = props.auth || {};
-        const diff = diffInDays(new Date(), user.period_end? new Date(user.period_end): null);
+        const diff = diffInDays(new Date(), user?.period_end? new Date(user.period_end): null);
         return diff >= 0;
     }
+
     const data = props?.route?.params.param1;
     const seriesData = props?.route?.params.param2 || {};
     let ismovie = false;
@@ -129,9 +130,6 @@ const VideoPlayer = (props) => {
         return `${Env.cloudFront}/posters/${image}`;
     };
 
-    console.log(hasPaid);
-    console.log(playing);
-    console.log(poster);
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
             <SafeAreaView />

@@ -63,6 +63,7 @@ class API {
 			"Cache-Control": "no-cache",
 			"dataType": "json",
 			"Authorization" : `Bearer ${await getApiToken()}`,
+			'X-PLATFORM': 'mobile'
 		};
 	}
 
@@ -140,13 +141,11 @@ class API {
 			resp = data;
 
 		}).catch((err) => {
-
-			console.log("error");
-			console.log(err);
+			console.log("error response");
+			console.log(err.response);
 			const data = err.response?.data;
 			let message = data ? data.message? data.message: "Une erreur s'est produite. Veuillez réessayer!": "Une erreur s'est produite. Veuillez réessayer!";
 
-			console.log(err.status);
 			if (err.response && err.response.status === 404){
 				message = "Cette lecture n'est plus disponible, toutes nos excuses!";
 			}
@@ -158,7 +157,8 @@ class API {
 			if (err.response && err.response.status === 401){
 				let state = Store.getState();
 				message = "";
-				if(state.auth.loggedIn){
+				if(state.auth.loggedIn || url === 'https://www.ilus-cinema.com/api/v1/token'){
+					AsyncStorage.removeItem('apiToken');
 					Store.dispatch({type: LOG_OUT});
 				}
 
