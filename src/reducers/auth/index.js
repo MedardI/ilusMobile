@@ -2,7 +2,7 @@ import {
   LOGIN,
   LOGIN_FAIL,
   LOGIN_SUCCESS,
-  LOG_OUT, PROFILE, PROFILE_FAIL, PROFILE_SUCCESS, TOKEN_FAIL,
+  LOG_OUT, PROFILE, PROFILE_FAIL, PROFILE_SUCCESS, REGISTER, REGISTER_FAIL, REGISTER_SUCCESS, SUBSCRIPTION_SUCCESS, TOKEN_FAIL,
 } from "../../constants";
 
 let initialState = {
@@ -22,12 +22,14 @@ const auth = (state = initialState, action) => {
   switch (action.type) {
     case LOGIN:
       return {...state,...initialState, ...{loggingIn: true}};
+    case REGISTER:
+      return {...state,...initialState, ...{registering: true, registerError: null}};
     case LOG_OUT:
       return {...state,...initialState};
     case PROFILE:
       return {...state,...{updating: true, profileError: null}};
     case PROFILE_SUCCESS:
-      return {...state,...{updating: false, user: action.data.user}};
+      return {...state,...{updating: false, user: action.data}};
     case PROFILE_FAIL:
       return {...state,...{updating: false, profileError: action.error}};
     case LOGIN_FAIL:
@@ -36,6 +38,14 @@ const auth = (state = initialState, action) => {
         ...initialState,
         ...{
           loginError: action.error? action.error : "Impossible de se connecter, veuillez réessayer",
+        }
+      };
+    case REGISTER_FAIL:
+      return {
+        ...state,
+        ...initialState,
+        ...{
+          registerError: action.error? action.error : "Impossible de s'inscrire, veuillez réessayer",
         }
       };
     case TOKEN_FAIL:
@@ -56,6 +66,24 @@ const auth = (state = initialState, action) => {
           user: action.data.user,
           token: action.data.token,
           loginError: null
+        }
+      };
+    case REGISTER_SUCCESS:
+      return {
+        ...state,
+        ...initialState,
+        ...{
+          loggedIn: true,
+          user: action.data.user,
+          token: action.data.token,
+          isNewRegistration: true,
+        }
+      };
+    case SUBSCRIPTION_SUCCESS:
+      return {
+        ...state,
+        ...{
+          user: action.data,
         }
       };
   }

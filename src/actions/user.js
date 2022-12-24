@@ -58,7 +58,7 @@ export const updateProfileResponse = (response) => {
     console.log(response);
     return {
         type: response.status? PROFILE_SUCCESS: PROFILE_FAIL,
-        data: response.user,
+        data: response.data?.user,
         error: response.error ? response.error: "Une erreur est survenue. Réessayez plus tard s'il vous plaît!"
     }
 };

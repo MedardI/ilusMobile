@@ -100,6 +100,11 @@ const Profile = (props) => {
                         <Text style={{ color: colors.white, fontSize: scaleFont(16), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, marginLeft: scale(20) }}>Téléchargements</Text>
                     </TouchableOpacity>
 
+                    <TouchableOpacity onPress={() => props.navigation.navigate("SubscriptionScreen")} style={{ flexDirection: 'row', marginTop: verticalScale(30) }}>
+                        <MaterialIcons name="credit-card" color={colors.green} size={verticalScale(22)} />
+                        <Text style={{ color: colors.white, fontSize: scaleFont(16), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, marginLeft: scale(20) }}>Abonnement</Text>
+                    </TouchableOpacity>
+
                     {/*<TouchableOpacity onPress={() => props.navigation.navigate("PrivacyPolicy")} style={{ flexDirection: 'row', marginTop: verticalScale(30) }}>*/}
                     {/*    <MaterialIcons name="policy" color={colors.green} size={verticalScale(22)} />*/}
                     {/*    <Text style={{ color: colors.white, fontSize: scaleFont(16), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, marginLeft: scale(20) }}>Privacy Policy</Text>*/}

@@ -11,7 +11,11 @@ import {
     LOG_OUT,
     LOGIN_URL,
     TOKEN_LOGIN_URL,
-    TOKEN_FAIL
+    TOKEN_FAIL,
+    REGISTER_SUCCESS,
+    REGISTER_FAIL,
+    REGISTER,
+    REGISTER_URL
 } from "../constants";
 
 import API from '../api';
@@ -146,3 +150,51 @@ const apiToken = (token) => {
 };
 
 
+//============================= REGISTER =============================//
+
+/**
+ * Initiate Log in action creator
+ *
+ * @param data
+ * @returns {{data: *, type: *}}
+ * @constructor
+ */
+ export const initRegister = (data) => {
+
+    return function (dispatch) {
+
+        dispatch(register());
+
+        API.post(REGISTER_URL, data).then((response) => {
+            dispatch(registerResponse(response));
+        }).catch((error) => {
+            console.log(error);
+        })
+    };
+};
+
+/**
+ *
+ * @returns {{type: *}}
+ *
+ * @constructor
+ */
+const register = () => {
+    return {
+        type: REGISTER,
+    }
+};
+
+/**
+ * @param response
+ * @returns {{data: *, type: *}}
+ * @constructor
+ */
+export const registerResponse = (response) => {
+    apiToken(response?.token);
+    return {
+        type: response.status? REGISTER_SUCCESS: REGISTER_FAIL,
+        data: response,
+        error: response.error
+    }
+};

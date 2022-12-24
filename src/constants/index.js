@@ -5,6 +5,10 @@ export const LOGIN_FAIL = "LOGIN_FAIL";
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 export const LOG_OUT = "LOG_OUT";
 
+export const REGISTER = "REGISTER";
+export const REGISTER_FAIL = "REGISTER_FAIL";
+export const REGISTER_SUCCESS = "REGISTER_SUCCESS";
+
 export const TOKEN_FAIL = "TOKEN_FAIL";
 
 //Movies
@@ -72,6 +76,9 @@ export const PAYMENT_METHODS = "PAYMENT_METHODS";
 export const PAYMENT_METHODS_FAIL = "PAYMENT_METHODS_FAIL";
 export const PAYMENT_METHODS_SUCCESS = "PAYMENT_METHODS_SUCCESS";
 
+export const SUBSCRIPTION = "SUBSCRIPTION";
+export const SUBSCRIPTION_SUCCESS = "SUBSCRIPTION_SUCCESS";
+
 // URLs
 export const LOGIN_URL = "v1/login";
 export const TOKEN_LOGIN_URL = "v1/token";
@@ -93,3 +100,5 @@ export const POST_LIKE_URL = `v1/create/like`;
 export const SEARCH_URL = (term) => `v1/search?search=${term}`;
 export const PROFILE_URL = `v1/update/profile/details`;
 export const PAYMENT_METHODS_URL = `v1/payments/methods`;
+export const REGISTER_URL = `v1/register`;
+export const SUBSCRIPTION_URL = `v1/subscriptions/update`

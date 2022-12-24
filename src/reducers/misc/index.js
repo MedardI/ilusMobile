@@ -9,7 +9,7 @@ let initialState = {
     list: []
   },
   paymentMethods: {
-    packages: [],
+    plans: [],
     methods: [],
     fetching: false,
     error: null,
@@ -76,7 +76,7 @@ const misc = (state = initialState, action) => {
       return {
         ...state,
         paymentMethods: {
-          packages: action.data.packages,
+          plans: action.data.plans.sort((a,b) => a.weight - b.weight),
           methods: action.data.methods,
           fetching: false,
           error: null,

@@ -35,7 +35,8 @@ const LoginScreen = (props) => {
         ToastAndroid.show(props.auth.loginError, ToastAndroid.SHORT);
     }
 
-   if (props.auth.loggedIn && !loggedIn){
+   if (props.auth.loggedIn && !loggedIn 
+    && !props.auth.isNewRegistration){
        setLoggedIn(true);
        setTimeout((
            () => props.navigation.navigate("BottomTab")

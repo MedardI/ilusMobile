@@ -30,6 +30,11 @@ const EditProfile = (props) => {
                 message: props.auth.profileError,
                 type: "danger"
             });
+        }else {
+            showMessage({
+                message: "Profil mis à jour avec succès!",
+                type: "info"
+            });
         }
     }
     const handleNameChange = (text) => {

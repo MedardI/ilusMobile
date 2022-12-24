@@ -55,6 +55,16 @@ const PaymentMethod = (props) => {
         return images[code] || defaultLogo;
     }
 
+    const onOk = () => {
+        setModalVisible(false)
+        if (props.auth.isNewRegistration ){
+            props.navigation.reset({
+                index: 0,
+                routes: [{ name: 'BottomTab' }],
+            });
+        }
+    }
+
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
@@ -148,7 +158,7 @@ const PaymentMethod = (props) => {
                         </View>
                     </View>
 
-                    <TouchableOpacity onPress={() => setModalVisible(false)} style={{ backgroundColor: colors.green, height: verticalScale(40), width: scale(200), justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6), marginTop: verticalScale(80) }}>
+                    <TouchableOpacity onPress={() => onOk()} style={{ backgroundColor: colors.green, height: verticalScale(40), width: scale(200), justifyContent: 'center', alignItems: 'center', borderRadius: verticalScale(6), marginTop: verticalScale(80) }}>
                         <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_BOLD }} >Ok</Text>
                     </TouchableOpacity>
 
@@ -166,6 +176,7 @@ const mapDispatchToProps = dispatch =>
 const mapStateToProps = (state)  => {
     return {
         misc: state.misc,
+        auth: state.auth
     }
 };
 

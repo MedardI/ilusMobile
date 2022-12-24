@@ -7,7 +7,8 @@ import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
 import { useFocusEffect } from '@react-navigation/native';
 import {
-    initPaymentMethods
+    initPaymentMethods,
+    initSubscription
 } from "../actions/misc"
 
 const SubscriptionScreen = (props) => {
@@ -23,8 +24,8 @@ const SubscriptionScreen = (props) => {
         React.useCallback(() => {
             let updated = false;
             if (!updated){
-                const packages = props.misc.paymentMethods.packages;
-                if (!Object.keys(packages).length){
+                const packages = props.misc.paymentMethods.plans;
+                if (!packages.length){
                     setFetching(true);
                 }
                 props.initPaymentMethods();
@@ -36,22 +37,26 @@ const SubscriptionScreen = (props) => {
     );
 
     const getPackages = () => {
-        const packages = props.misc.paymentMethods.packages;
-        if (packages && Object.keys(packages).length){
-            const all = [];
-            Object.keys(packages).forEach(key => {
-                if (packages.hasOwnProperty(key)){
-                    all.push({
-                        ...packages[key],
-                        code: key
-                    });
-                }
-            })
+        return props.misc.paymentMethods.plans;
+    }
 
-            return all;
-        }
+    const goBack = () => {
+        if (!props.auth.isNewRegistration) props.navigation.goBack();
+        else props.navigation.navigate("BottomTab");
+    }
 
-        return [];
+    const updatePackage = (id, name, amount, duration) => {
+        props.initSubscription(id);
+        props.navigation.navigate("PaymentMethod", {
+            id,
+            name,
+            amount,
+            duration
+        })
+    }
+
+    const isCurrentSubscription = (id) => {
+        return props.auth?.user?.subscription?.braintree_id === id;
     }
 
     return (
@@ -59,7 +64,7 @@ const SubscriptionScreen = (props) => {
             <SafeAreaView />
             <StatusBar barStyle={"light-content"} backgroundColor={colors.black} hidden={false} translucent={false}
             />
-            <AppHeader heading="Abonnement" navigation={() => props.navigation.goBack()} showicon={true} />
+            <AppHeader heading="Abonnement" navigation={() => goBack()} showicon={true} />
 
             {
                 (fetching)? (
@@ -79,24 +84,53 @@ const SubscriptionScreen = (props) => {
 
             <ScrollView>
 
+            
                 {getPackages().map((packages) => {
                     return (
-                        <TouchableOpacity key={packages.code} activeOpacity={0.8} onPress={() => props.navigation.navigate("PaymentMethod", {
-                            name: packages.name.toUpperCase(),
-                            amount: `${packages.currency}${packages.amount}`,
-                            duration: `${packages.duration} ${packages.type.toUpperCase()}`
-                        })} style={{ height: verticalScale(90), width: scale(320), borderRadius: verticalScale(12), backgroundColor: colors.green, alignSelf: 'center', marginTop: verticalScale(10) }}>
+                        <TouchableOpacity key={packages.id} activeOpacity={0.8} onPress={() => updatePackage(
+                            packages.plan_id,
+                            packages.meta.name.toUpperCase(),
+                            `${packages.meta.currency}${packages.plan_amount}`,
+                            `${packages.meta.duration} ${packages.meta.type.toUpperCase()}`
+                        )} style={{ 
+                            height: verticalScale(90), 
+                            width: scale(320), 
+                            borderRadius: verticalScale(12), 
+                            backgroundColor: isCurrentSubscription(packages.plan_id)? colors.primary : colors.green, 
+                            alignSelf: 'center',
+                            position: "relative",
+                            marginTop: verticalScale(10) }}>
+                            {
+                                isCurrentSubscription(packages.plan_id) ?
+                                (<MaterialIcons
+                                    style={{
+                                       position: 'absolute',
+                                       top: 5,
+                                       right: 5,
+                                    }}
+                                    name="check-circle" color={colors.green} size={verticalScale(25)} />) : null
+                            }
                             <Text style={{ marginLeft: scale(20), marginTop: verticalScale(20), color: colors.white, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>
-                            {packages.name.toUpperCase()}
+                            {packages.meta.name.toUpperCase()}
                             </Text>
                             <View style={{ width: scale(280), marginTop: verticalScale(10), flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', alignSelf: 'center' }}>
                                 <Text style={{ fontSize: scaleFont(16), color: colors.white, fontFamily: constants.OPENSANS_FONT_BOLD }}>
-                                    {`${packages.duration} ${packages.type.toUpperCase()}`}
+                                    {`${packages.meta.duration} ${packages.meta.type.toUpperCase()}`}
                                 </Text>
                                 <Text style={{ fontSize: scaleFont(18), color: colors.white, fontFamily: constants.OPENSANS_FONT_BOLD }}>
-                                    {`${packages.currency}${packages.amount}`}
+                                    {`${packages.meta.currency}${packages.plan_amount}`}
                                 </Text>
                             </View>
+                            {
+                                isCurrentSubscription(packages.plan_id) ?
+                                (<View>
+                                    <Text style={{
+                                    color: colors.statementGreenColour,
+                                    textAlign: "center",
+                                    fontSize: scaleFont(12)
+                                }}>Votre abonnement actuel</Text>
+                                </View>) : null
+                            }
                         </TouchableOpacity>
                     );
                 })}
@@ -126,12 +160,14 @@ const SubscriptionScreen = (props) => {
 
 const mapDispatchToProps = dispatch =>
     bindActionCreators({
-        initPaymentMethods
+        initPaymentMethods,
+        initSubscription
     }, dispatch);
 
 const mapStateToProps = (state)  => {
     return {
         misc: state.misc,
+        auth: state.auth
     }
 };
 
