@@ -71,11 +71,18 @@ const Downloads = (props) => {
     };
 
     const convertRunTime = (time) => {
+        if (!time) return '';
         const hours = Math.floor(time / 60);
         const min = Math.floor(time) - (hours * 60);
 
         return `${hours}h ${min}'`;
     };
+
+    const play = (index) => {
+        const data = downloads[index];
+        delete data.createdAt;
+        props.navigation.navigate("VideoPlayer", { param1: downloads[index]});
+    }
 
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
@@ -97,6 +104,18 @@ const Downloads = (props) => {
                             <GestureHandlerRootView style={{ backgroundColor: colors.black, height: verticalScale(110), marginVertical: verticalScale(7), borderRadius: verticalScale(12) }}>
                                 <Swipeable
                                     ref={ref => item = ref}
+                                    renderRightActions={() => {
+                                        return (
+                                            <TouchableOpacity onPress={() => play(index)}
+                                                style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: colors.green, width: scale(80), height: verticalScale(110), borderRadius: verticalScale(12), }}>
+                                                <TouchableOpacity
+                                                    onPress={() => play(index)}
+                                                    style={{ color: colors.white }}>
+                                                    <Text style={{ color: colors.white, marginLeft: scale(6), fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>JOUER</Text>
+                                                </TouchableOpacity>
+                                            </TouchableOpacity>
+                                        )
+                                    }}
                                     renderLeftActions={() => {
                                         return (
                                             <TouchableOpacity onPress={() => {
@@ -118,7 +137,7 @@ const Downloads = (props) => {
                                     }}
 
                                 >
-                                    <View style={{ width: scale(340), backgroundColor: "#36454f", flexDirection: 'row', borderRadius: verticalScale(12) }}>
+                                    <TouchableOpacity onPress={() => play(index)} style={{ width: scale(340), backgroundColor: "#36454f", flexDirection: 'row', borderRadius: verticalScale(12) }}>
                                         <View style={{ borderTopLeftRadius: verticalScale(12), borderBottomLeftRadius: verticalScale(12) }}>
                                             <Image source={
                                                 {
@@ -158,20 +177,8 @@ const Downloads = (props) => {
                                                     </Text>
                                                 </View>
                                             </View>
-                                            <View style={{
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                backgroundColor: colors.green,
-                                            }}>
-                                                <TouchableOpacity onPress={
-                                                    () => props.navigation.navigate("VideoPlayer", { param1: downloads[index]})
-                                                } style={{ flexDirection: 'row', backgroundColor: colors.green, width: scale(120), height: verticalScale(30), borderRadius: verticalScale(12), justifyContent: 'center', alignItems: 'center' }}>
-                                                    <Text style={{ color: colors.white, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_BOLD }}> JOUER </Text>
-                                                    <MaterialIcons name="play-arrow" color={colors.white} size={verticalScale(20)} />
-                                                </TouchableOpacity>
-                                            </View>
                                         </View>
-                                    </View>
+                                    </TouchableOpacity>
                                 </Swipeable>
                             </GestureHandlerRootView>
                         )

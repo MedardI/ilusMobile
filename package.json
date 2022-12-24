@@ -21,6 +21,7 @@
     "react-native": "0.69.3",
     "react-native-app-intro-slider": "^4.0.4",
     "react-native-background-downloader": "github:kesha-antonov/react-native-background-downloader",
+    "react-native-dropdown-picker": "^5.4.4",
     "react-native-fast-image": "^8.6.3",
     "react-native-flash-message": "^0.3.1",
     "react-native-fs": "^2.20.0",

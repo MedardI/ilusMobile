@@ -67,7 +67,8 @@ const VideoPlayer = (props) => {
                 });
             }
         } else {
-            initWatchSerie(data.id, seriesData.episodeId)
+            if (!data.downloaded){
+                initWatchSerie(data.id, seriesData.episodeId)
                 .then(response => {
                     if (response.data?.playlist?.playlist){
                         setPoster(response.data.current_episode.backdrop);
@@ -87,6 +88,7 @@ const VideoPlayer = (props) => {
                 }).catch(() => {
                 setFetching(false);
             });
+          }
         }
     }, []);
 
@@ -121,7 +123,7 @@ const VideoPlayer = (props) => {
             if (ismovie){
                 props.initUpdateRecentAction(data.id, data.duration_time ? data.duration_time : Math.floor(progress.seekableDuration), Math.floor(progress.currentTime), data._id);
             } else {
-                props.initUpdateSerieRecentAction(data.id, seriesData.episodeId, Math.floor(progress.seekableDuration), Math.floor(progress.currentTime));
+                props.initUpdateSerieRecentAction(data.id, data.episodeId? data.episodeId : seriesData.episodeId, Math.floor(progress.seekableDuration), Math.floor(progress.currentTime), data._id);
             }
         }
     };
@@ -222,9 +224,9 @@ const VideoPlayer = (props) => {
                     <View style={{ width: scale(340), justifyContent: 'center', alignSelf: 'center' }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: verticalScale(5) }}>
                             <Text style={{ color: colors.white, fontSize: scaleFont(22), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>{data.name}</Text>
-                            <TouchableOpacity onPress={() => downloaditem()} style={{ justifyContent: 'center', alignItems: 'center', marginRight: scale(10) }} >
+                            {/* <TouchableOpacity onPress={() => downloaditem()} style={{ justifyContent: 'center', alignItems: 'center', marginRight: scale(10) }} >
                                 <MaterialIcons name="file-download" color={download ? colors.green : colors.greyColour} size={verticalScale(26)} />
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center', }}>
                             <Text style={{ color: colors.white, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, marginRight: scale(6) }}>{data.duration}</Text>

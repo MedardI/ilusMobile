@@ -17,7 +17,7 @@ import {
 } from "../constants";
 
 import API from '../api';
-
+import {updateRecord} from "../api/helper";
 
 //============================= DISCOVER =============================//
 
@@ -107,7 +107,6 @@ const serie = () => {
  * @constructor
  */
 export const serieResponse = (response) => {
-    console.log("action response");
     return {
         type: response.status? SERIE_SUCCESS: SERIE_FAIL,
         data: response.data,
@@ -136,7 +135,11 @@ export const initWatchSerie = (id, episode) => {
  * @returns {{data: *, type: *}}
  * @constructor
  */
-export const initUpdateRecent = (id, episodeId, duration, current) => {
+export const initUpdateRecent = (id, episodeId, duration, current, localId) => {
+    if (localId){
+        updateRecord(localId, duration, current).catch();
+    }
+
     return function (dispatch) {
         API.post(SERIES_RECENT_URL, {
             episode_id: episodeId,

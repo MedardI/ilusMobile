@@ -10,12 +10,13 @@ import Env from "../env";
 import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
 import {initMovie as getMovieAction, initWatchMovie} from "../actions/movies";
+import { initWatchSerie } from "../actions/series";
 import {initSerie as getSerieAction} from "../actions/series";
 import {initPostLike} from "../actions/misc";
-import {getDatastore, isDownloaded, isVideoDownloaded, removeFile, saveDownload} from "../api/helper";
+import {getDatastore, getDeviceFreeStorage, getDownloadedURL, isDownloaded, isVideoDownloaded, removeFile, saveDownload} from "../api/helper";
 import { download as downloadHandler, directories, checkForExistingDownloads} from 'react-native-background-downloader'
 import { allGenres } from '../utils/Data';
-
+import DropDownPicker from 'react-native-dropdown-picker';
 
 const RenderYoutubeModal = (play, id, onStateChange, togglePlaying) => {
     return (
@@ -67,18 +68,17 @@ const RenderYoutubeModal = (play, id, onStateChange, togglePlaying) => {
     )
 };
 
-const RenderButtons = (props, data, title, episode, selectedId, toggleTrailer) => {
+const RenderButtons = (props, data, title, episode, selectedId, toggleTrailer, playEpisode, ismovie) => {
     return (
         <View style={{
             flex: 1,
             flexDirection: "row"
         }}>
-            <TouchableOpacity onPress={() => props.navigation.navigate("VideoPlayer", { param1: data, param2: {
+            <TouchableOpacity onPress={() => ismovie ? props.navigation.navigate("VideoPlayer", { param1: data, param2: {
                     episodeId: episode ? episode.id: '',
                     season: selectedId
-                } })} style={{ flexDirection: 'row',
+                } }): playEpisode(episode.id)} style={{ flexDirection: 'row',
                 backgroundColor: colors.statementGreenColour,
-                maxWidth: 100,
                 width: scale(150),
                 height: verticalScale(40),
                 borderRadius: verticalScale(12),
@@ -92,7 +92,6 @@ const RenderButtons = (props, data, title, episode, selectedId, toggleTrailer) =
                     (
                         <TouchableOpacity onPress={() => toggleTrailer()} style={{ flexDirection: 'row',
                             backgroundColor: colors.green,
-                            maxWidth: 150,
                             width: scale(150),
                             height: verticalScale(40),
                             borderRadius: verticalScale(12),
@@ -185,6 +184,10 @@ const PlayerScreen = (props) => {
     const [downloadedVideo, setDownloadedVideo] = useState(null);
     const [downloadTask, setDownloadTask] = useState(null);
     const [checkExistingDownload, setCheckExistingDownload] = useState(true);
+    const [episodesSelector, setEpisodeSelector] = useState([]);
+    const [openEpisodesSelector, setOpenEpisodesSelector] = useState(false);
+    const [episodeToDownload, setEpisodeToDownload] = useState(null);
+    const [seriesDownloaded, setSeriesDownloaded] = useState([]);
 
     if (!id){
         setId(data.id);
@@ -221,6 +224,41 @@ const PlayerScreen = (props) => {
         }
     };
 
+    const updateEpisodesSelector = (series) => {
+        getDatastore().then((db) => {
+            db.find({id}, (error, records) => {
+                setSeriesDownloaded(records);
+                const all = [];
+                const seasons = Object.keys(series.season || {});
+                (seasons).forEach(n => {
+                    all.push({
+                        label: `Saison ${n}`,
+                        value: n
+                    })
+                    series.season[n].sort((a, b) => (parseInt(b.episode_number) - parseInt(a.episode_number))).forEach(e => {
+                        const found = ((records || []).filter(r => r.episodeId === e.id)||[])[0];
+                        const option = {
+                                label: `Episode ${e.episode_number}`,
+                                value: `${e.id}`,
+                                parent: n,
+                                serieId: e.series_id,
+                                disabled: found !== undefined
+                            };
+                        if (found){
+                            option.labelStyle = {
+                                color: colors.green
+                            }
+                            option.label = `Episode ${e.episode_number} (Déjà téléchargé)`;
+                        }
+                        all.push(option)
+                    });
+                })
+        
+                setEpisodeSelector(all);
+            });
+        });
+    }
+
     const getSerie = (serieId) => {
         const dataId = serieId ? serieId : id;
         if (props.series?.all?.list?.length){
@@ -233,8 +271,6 @@ const PlayerScreen = (props) => {
             db.findOne({id}, (error, record) => {
                 if (record){
                     isVideoDownloaded(id).then((status) => {
-                        console.log("Current file status");
-                        console.log(status);
                         setDownloaded(status);
                         setDownloadedVideo({
                             ...record,
@@ -271,6 +307,7 @@ const PlayerScreen = (props) => {
                     if (serie){
                         setWishList(serie.is_like);
                         setDetails(serie);
+                        updateEpisodesSelector(serie);
                     }
                 } else {
                     setError(props.series.all.error);
@@ -357,6 +394,7 @@ const PlayerScreen = (props) => {
                 } else {
                     setWishList(serie.is_like);
                     setDetails(serie);
+                    updateEpisodesSelector(serie);
                 }
             }
         }
@@ -411,67 +449,111 @@ const PlayerScreen = (props) => {
         })
     };
 
-    const downloaditem = async () => {
+    const downloaditem = async (seriesId = null, episodeId = null) => {
         setdownload(!download);
-        initDownload(!download).catch();
+        initDownload(!download, seriesId, episodeId).catch();
     };
 
     const onDownloadProgress = (progress) => {
         setDownloadProgress(progress);
     };
 
-    const initDownload = async (download) => {
+    const initDownload = async (download, seriesId, episodeId) => {
         const data = getData();
-        const saveFile = (url, id) => {
-            saveDownload(data).catch();
-            showMessage({
-                backgroundColor: colors.green,
-                message: "Téléchargement commencé",
-                type: "info",
-            });
-            let task = downloadHandler({
-                id: id,
-                url: url,
-                destination: `${directories.documents}/${id}`,
-                metadata: {}
-            }).begin(({ expectedBytes, headers }) => {
+        const storage = await getDeviceFreeStorage();
+        
+        if (storage >= 1){
+            const saveFile = (url, id, episode) => {
+                if (episode){
+                    saveDownload({
+                        ...data,
+                        episodeId: episode.id,
+                        episode: episode
+                    }).catch();
+                } else {
+                    saveDownload(data).catch();
+                }
                 
-            }).progress(percent => onDownloadProgress(percent)).done(() => {
-                setDownloaded(true);
-                // if (Platforms.OS === 'ios')
-                //     completeHandler(jobId)
-            }).error(error => {
-                console.log('Download canceled due to error: ', error);
-            });
-            setDownloadTask(task);
-        };
-        if (download) {
-            if (ismovie){
-                initWatchMovie(data.id)
-                    .then(response => {
-                        if (response.data?.playlist?.playlist){
-                            const url = response.data?.playlist.playlist[0].sources[0].file;
-                            if (url){
-                               saveFile(url, data.id);
-                            } else {
-                                showMessage({
-                                    backgroundColor: colors.primary_red,
-                                    message: "Impossible de télécharger maintenant, veuillez réessayer plus tard",
-                                    type: "info",
-                                })
-                            }
-                        }
-                    }).catch(() => {
-                    showMessage({
-                        backgroundColor: colors.primary_red,
-                        message: "Impossible de télécharger maintenant, veuillez réessayer plus tard",
-                        type: "info",
-                    })
+                showMessage({
+                    backgroundColor: colors.green,
+                    message: "Téléchargement commencé",
+                    type: "info",
                 });
+                const path = episode ? episode.id: id;
+                let task = downloadHandler({
+                    id: id,
+                    url: url,
+                    destination: `${directories.documents}/${path}`,
+                    metadata: {}
+                }).begin(({ expectedBytes, headers }) => {
+                    console.log("Downling.............");
+                    console.log(`Path: ${path}`);
+                }).progress(percent => onDownloadProgress(percent)).done(() => {
+                    setDownloaded(true);
+                    // if (Platforms.OS === 'ios')
+                    //     completeHandler(jobId)
+                }).error(error => {
+                    console.log('Download canceled due to error: ', error);
+                });
+                setDownloadTask(task);
+            };
+            if (download) {
+                if (ismovie){
+                    initWatchMovie(data.id)
+                        .then(response => {
+                            if (response.data?.playlist?.playlist){
+                                const url = response.data?.playlist.playlist[0].sources[0].file;
+                                if (url){
+                                   saveFile(url, data.id);
+                                } else {
+                                    showMessage({
+                                        backgroundColor: colors.primary_red,
+                                        message: "Impossible de télécharger maintenant, veuillez réessayer plus tard",
+                                        type: "info",
+                                    })
+                                }
+                            }
+                        }).catch(() => {
+                        showMessage({
+                            backgroundColor: colors.primary_red,
+                            message: "Impossible de télécharger maintenant, veuillez réessayer plus tard!",
+                            type: "warning",
+                        })
+                    });
+                } else {        
+                    initWatchSerie(seriesId, episodeId)
+                        .then(response => {
+                            if (response.data?.playlist?.playlist){
+                                const url = response.data?.playlist.playlist[0].sources[0].file;
+                                if (url){
+                                   saveFile(url, seriesId, response.data.current_episode);
+                                } else {
+                                    showMessage({
+                                        backgroundColor: colors.primary_red,
+                                        message: "Impossible de télécharger maintenant, veuillez réessayer plus tard",
+                                        type: "info",
+                                    })
+                                }
+                            }
+                        }).catch(() => {
+                        showMessage({
+                            backgroundColor: colors.primary_red,
+                            message: "Impossible de télécharger maintenant, veuillez réessayer plus tard!",
+                            type: "warning",
+                        });
+                    });
+                }
+            } else {
+                cancelDownload();
             }
         } else {
-            cancelDownload();
+            showMessage({
+                backgroundColor: colors.primary_red,
+                message: "Il vous reste moins d'1 Go d'espace libre sur votre appareil. Veuillez supprimer certains fichiers avant de télécharger!",
+                type: "warning",
+            });
         }
+        
     };
 
     const Item = ({ index, onPress, textColor }) => (
@@ -492,6 +574,10 @@ const PlayerScreen = (props) => {
         );
     };
 
+    const initEpisodeDownload = (selected) => {
+        console.log(selected);
+        downloaditem(selected.serieId, selected.value);
+    }
 
     const getPosterURL = (image) => {
         return `${Env.cloudFront}/posters/${image}`;
@@ -561,9 +647,76 @@ const PlayerScreen = (props) => {
         return '';
     }
 
+    const playEpisode = (episodeId) => {
+        let found = episodeId? ((seriesDownloaded || []).filter(r => r.episodeId === episodeId)||[])[0]: null;
+        if (!found) found = {};
+        else {
+            found.downloaded = true;
+            found.url = getDownloadedURL(episodeId);
+        }
+        props.navigation.navigate("VideoPlayer", { param1: {
+            ...data,
+            ...found
+        }, param2: {
+            episodeId: episodeId,
+            season: selectedId
+        } })
+    }
+
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
             <SafeAreaView />
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={openEpisodesSelector}
+                onRequestClose={() => setOpenEpisodesSelector(false)}
+            >
+                <View style={{
+                    padding: 15,
+                    flex: 1,
+                    position: 'relative',
+                    backgroundColor: 'rgba(255,255,255,.8)'
+                }}>
+                    <Text
+                        style={{ 
+                            color: colors.black,
+                            textAlign: "center",
+                            fontSize: scaleFont(14),
+                            marginBottom: 8,
+                            fontFamily: constants.OPENSANS_FONT_MEDIUM,
+                             }}>
+                        Choisissez l'épisode à télécharger
+                    </Text>
+                    <TouchableOpacity onPress={() => setOpenEpisodesSelector(false)}
+                     style={{
+                        position: 'absolute',
+                        width: 25,
+                        height: 25,
+                        right: 8,
+                        top: 5,
+                        borderRadius: 25,
+                        backgroundColor: colors.white,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginLeft: scale(20) }} >
+                        <MaterialIcons name="close" color={colors.green} size={verticalScale(15)} />
+                    </TouchableOpacity>
+                    <DropDownPicker
+                        theme="DARK"
+                        language="FR"
+                        stickyHeader={true}
+                        categorySelectable={false}
+                        open={openEpisodesSelector}
+                        onSelectItem={initEpisodeDownload}
+                        value={episodeToDownload}
+                        items={episodesSelector}
+                        setOpen={setOpenEpisodesSelector}
+                        setValue={setEpisodeToDownload}
+                        setItems={setEpisodeSelector}
+                    />
+                </View>
+            </Modal>
             {
                 !loading && details && details[type].trailer ?
                 RenderYoutubeModal(playTrailer, getYoutubeId(), onYoutubeStateChange, togglePlayingTrailer): null
@@ -628,9 +781,9 @@ const PlayerScreen = (props) => {
                         </View>
 
 
-                        <View style={{ paddingLeft: scale(10), width: scale(360), justifyContent: 'center', marginTop: verticalScale(-46), backgroundColor: 'rgba(0,0,0,0.7)', borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }}>
+                        <View style={{ display: "flex", paddingLeft: scale(10), width: scale(360), justifyContent: 'center', marginTop: verticalScale(-46), backgroundColor: 'rgba(0,0,0,0.7)', borderTopLeftRadius: verticalScale(6), borderTopRightRadius: verticalScale(6) }}>
                             <Text style={{ color: colors.white, fontSize: scaleFont(22), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>{details[type].name}</Text>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row', display: "flex"}}>
                                 <Text style={{ color: colors.white, fontSize: scaleFont(13), fontFamily: constants.OPENSANS_FONT_MEDIUM, marginRight: scale(6) }}>{ismovie ? convertRunTime(details[type].runtime): `${details.season? Object.keys(details.season).length: 0} Saison(s)` }</Text>
                                 <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
 
@@ -644,31 +797,48 @@ const PlayerScreen = (props) => {
                                 <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
 
                                 <Text style={{ color: colors.white, fontSize: scaleFont(13), fontFamily: constants.OPENSANS_FONT_MEDIUM, marginHorizontal: scale(6) }}>{details[type].age}</Text>
+
+                                <View style={{
+                                    display: 'flex',
+                                    alignSelf: "flex-end",
+                                    flexDirection: 'row',
+                                    alignItems: "stretch",
+                                    justifyContent: "space-between"
+                                }}>
+                                    <TouchableOpacity onPress={() => wishlist()} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(10) }} >
+                                        <FontAwesome name="heart" color={WishList ? colors.green : colors.greyColour} size={verticalScale(20)} />
+                                    </TouchableOpacity>
+
+                                    {
+                                        ismovie? (downloaded && !download)? <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(8) }} >
+                                            <MaterialIcons name="cloud-download" color={colors.green} size={verticalScale(20)} />
+                                        </TouchableOpacity> : <TouchableOpacity onPress={() => downloaditem()} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(8) }} >
+                                            <MaterialIcons name="file-download" color={download ? colors.primary_red : colors.greyColour} size={verticalScale(20)} />
+                                        </TouchableOpacity> : null
+                                    }
+
+                                    {
+                                        !ismovie ? (
+                                            <TouchableOpacity onPress={() => download ? downloaditem() : setOpenEpisodesSelector(true)} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(10) }} >
+                                                <MaterialIcons name="file-download" color={download ? colors.primary_red : colors.greyColour} size={verticalScale(20)} />
+                                            </TouchableOpacity>
+                                        ): null
+                                    }
+                                </View>
+                                
                             </View>
                         </View>
 
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: scale(20), marginTop: verticalScale(10) }}>
                             {
                                 ismovie || details && details.season ? (
-                                    RenderButtons(props, getData(), getPlayTitle(), episode, selectedId, togglePlayingTrailer)
+                                    RenderButtons(props, getData(), getPlayTitle(), episode, selectedId, togglePlayingTrailer, playEpisode, ismovie)
                                 ): (
                                     <Text style={{ color: colors.green, fontSize: scaleFont(18), fontFamily: constants.OPENSANS_FONT_MEDIUM }}>
                                         Bientôt
                                     </Text>
                                 )
                             }
-                            <TouchableOpacity onPress={() => wishlist()} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(20) }} >
-                                <FontAwesome name="heart" color={WishList ? colors.green : colors.greyColour} size={verticalScale(26)} />
-                            </TouchableOpacity>
-
-                            {
-                                ismovie? (downloaded && !download)? <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(15) }} >
-                                    <MaterialIcons name="cloud-download" color={colors.green} size={verticalScale(30)} />
-                                </TouchableOpacity> : <TouchableOpacity onPress={() => downloaditem()} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(15) }} >
-                                    <MaterialIcons name="file-download" color={download ? colors.primary_red : colors.greyColour} size={verticalScale(30)} />
-                                </TouchableOpacity> : null
-                            }
-
                         </View>
 
                         {
@@ -701,7 +871,7 @@ const PlayerScreen = (props) => {
 
 
                         {
-                            ismovie && details.casts && details.casts.length ? (
+                            details.casts && details.casts.length ? (
                                 <View style={{ flexDirection: 'row', marginTop: verticalScale(15), }}>
                                     <TouchableOpacity onPress={() => { setSeasons(true) }} style={{ marginLeft: scale(20) }}>
                                         <Text style={{ color: Clips ? colors.green : colors.greyColour, fontSize: scaleFont(16), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }} >Acteurs principaux </Text>
@@ -711,7 +881,7 @@ const PlayerScreen = (props) => {
                         }
 
                         {
-                            ismovie && details.casts && details.casts.length?
+                            details.casts && details.casts.length?
                                 (RenderCasts(details.casts)) : null
                         }
 
@@ -783,10 +953,7 @@ const PlayerScreen = (props) => {
                                         data={episodes}
                                         renderItem={({ item, index }) => {
                                             return (
-                                                <TouchableOpacity onPress={() => props.navigation.navigate("VideoPlayer", { param1: data, param2: {
-                                                    episodeId: item.id,
-                                                    season: selectedId
-                                                    } })} style={{ marginHorizontal: scale(6) }} >
+                                                <TouchableOpacity onPress={() => playEpisode(item.id)} style={{ marginHorizontal: scale(6) }} >
                                                     <Image source={{
                                                         uri: getBackDropURL(item.backdrop)
                                                     }} style={{ height: verticalScale(110), width: scale(130), borderRadius: verticalScale(6) }} />
