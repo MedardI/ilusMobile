@@ -18,7 +18,7 @@ import {
 
 import API from '../api';
 import {updateRecord} from "../api/helper";
-
+import { subscriptionResponse } from "./misc";
 //============================= DISCOVER =============================//
 
 /**
@@ -81,6 +81,9 @@ export const initSerie = (id) => {
         dispatch(serie());
 
         API.get(SERIE_URL(id)).then((response) => {
+            if (response.user) {
+                dispatch(subscriptionResponse(response));
+            }
             dispatch(serieResponse(response));
         }).catch((error) => {
             console.log(error);

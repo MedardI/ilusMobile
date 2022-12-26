@@ -16,6 +16,7 @@ import {
 
 import API from '../api';
 import {updateRecord} from "../api/helper";
+import { subscriptionResponse } from "./misc";
 
 
 //============================= DISCOVER =============================//
@@ -79,6 +80,9 @@ export const initMovie = (id) => {
         dispatch(movie());
 
         API.get(MOVIE_URL(id)).then((response) => {
+            if (response.user) {
+                dispatch(subscriptionResponse(response));
+            }
             dispatch(movieResponse(response));
         }).catch((error) => {
             console.log(error);

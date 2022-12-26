@@ -253,7 +253,7 @@ const PlayerScreen = (props) => {
                         all.push(option)
                     });
                 })
-        
+
                 setEpisodeSelector(all);
             });
         });
@@ -461,7 +461,7 @@ const PlayerScreen = (props) => {
     const initDownload = async (download, seriesId, episodeId) => {
         const data = getData();
         const storage = await getDeviceFreeStorage();
-        
+
         if (storage >= 1){
             const saveFile = (url, id, episode) => {
                 if (episode){
@@ -473,7 +473,7 @@ const PlayerScreen = (props) => {
                 } else {
                     saveDownload(data).catch();
                 }
-                
+
                 showMessage({
                     backgroundColor: colors.green,
                     message: "Téléchargement commencé",
@@ -486,14 +486,11 @@ const PlayerScreen = (props) => {
                     destination: `${directories.documents}/${path}`,
                     metadata: {}
                 }).begin(({ expectedBytes, headers }) => {
-                    console.log("Downling.............");
-                    console.log(`Path: ${path}`);
                 }).progress(percent => onDownloadProgress(percent)).done(() => {
                     setDownloaded(true);
                     // if (Platforms.OS === 'ios')
                     //     completeHandler(jobId)
                 }).error(error => {
-                    console.log('Download canceled due to error: ', error);
                 });
                 setDownloadTask(task);
             };
@@ -520,7 +517,7 @@ const PlayerScreen = (props) => {
                             type: "warning",
                         })
                     });
-                } else {        
+                } else {
                     initWatchSerie(seriesId, episodeId)
                         .then(response => {
                             if (response.data?.playlist?.playlist){
@@ -553,7 +550,7 @@ const PlayerScreen = (props) => {
                 type: "warning",
             });
         }
-        
+
     };
 
     const Item = ({ index, onPress, textColor }) => (
@@ -575,7 +572,6 @@ const PlayerScreen = (props) => {
     };
 
     const initEpisodeDownload = (selected) => {
-        console.log(selected);
         downloaditem(selected.serieId, selected.value);
     }
 
@@ -642,7 +638,7 @@ const PlayerScreen = (props) => {
             if (splits && splits.length){
                 return splits[splits.length - 1].replace("watch?v=",'');
             }
-            
+
         }
         return '';
     }
@@ -664,8 +660,40 @@ const PlayerScreen = (props) => {
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor: colors.black }}>
+        <View style={{ flex: 1, backgroundColor: colors.black, position: "relative" }}>
             <SafeAreaView />
+            {
+                !loading? (
+                    <View
+                        style={{
+                            position: "absolute",
+                            zIndex: 100,
+                            backgroundColor: "rgba(255,255,255,0)",
+                            top: verticalScale(380),
+                            right: 8,
+                            alignItems: "center"
+                        }}>
+                        <TouchableOpacity onPress={() => wishlist()} style={{ justifyContent: 'center', alignItems: 'center', marginBottom: verticalScale(8) }} >
+                            <FontAwesome name="heart" color={WishList ? colors.green : colors.white} size={verticalScale(20)} />
+                        </TouchableOpacity>
+                    {
+                        ismovie? (downloaded && !download)? <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center' }} >
+                            <MaterialIcons name="cloud-download" color={colors.green} size={verticalScale(25)} />
+                        </TouchableOpacity> : <TouchableOpacity onPress={() => downloaditem()} style={{ justifyContent: 'center', alignItems: 'center'}} >
+                            <MaterialIcons name="file-download" color={download ? colors.primary_red : colors.white} size={verticalScale(30)} />
+                        </TouchableOpacity> : null
+                    }
+
+                    {
+                        !ismovie ? (
+                            <TouchableOpacity onPress={() => download ? downloaditem() : setOpenEpisodesSelector(true)} style={{ justifyContent: 'center', alignItems: 'center' }} >
+                                <MaterialIcons name="file-download" color={download ? colors.primary_red : colors.white} size={verticalScale(30)} />
+                            </TouchableOpacity>
+                        ): null
+                    }
+                    </View>
+                ): null
+            }
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -679,7 +707,7 @@ const PlayerScreen = (props) => {
                     backgroundColor: 'rgba(255,255,255,.8)'
                 }}>
                     <Text
-                        style={{ 
+                        style={{
                             color: colors.black,
                             textAlign: "center",
                             fontSize: scaleFont(14),
@@ -797,35 +825,6 @@ const PlayerScreen = (props) => {
                                 <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
 
                                 <Text style={{ color: colors.white, fontSize: scaleFont(13), fontFamily: constants.OPENSANS_FONT_MEDIUM, marginHorizontal: scale(6) }}>{details[type].age}</Text>
-
-                                <View style={{
-                                    display: 'flex',
-                                    alignSelf: "flex-end",
-                                    flexDirection: 'row',
-                                    alignItems: "stretch",
-                                    justifyContent: "space-between"
-                                }}>
-                                    <TouchableOpacity onPress={() => wishlist()} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(10) }} >
-                                        <FontAwesome name="heart" color={WishList ? colors.green : colors.greyColour} size={verticalScale(20)} />
-                                    </TouchableOpacity>
-
-                                    {
-                                        ismovie? (downloaded && !download)? <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(8) }} >
-                                            <MaterialIcons name="cloud-download" color={colors.green} size={verticalScale(20)} />
-                                        </TouchableOpacity> : <TouchableOpacity onPress={() => downloaditem()} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(8) }} >
-                                            <MaterialIcons name="file-download" color={download ? colors.primary_red : colors.greyColour} size={verticalScale(20)} />
-                                        </TouchableOpacity> : null
-                                    }
-
-                                    {
-                                        !ismovie ? (
-                                            <TouchableOpacity onPress={() => download ? downloaditem() : setOpenEpisodesSelector(true)} style={{ justifyContent: 'center', alignItems: 'center', marginLeft: scale(10) }} >
-                                                <MaterialIcons name="file-download" color={download ? colors.primary_red : colors.greyColour} size={verticalScale(20)} />
-                                            </TouchableOpacity>
-                                        ): null
-                                    }
-                                </View>
-                                
                             </View>
                         </View>
 
@@ -950,7 +949,7 @@ const PlayerScreen = (props) => {
                                     <FlatList
                                         horizontal
                                         style={{ marginTop: verticalScale(15) }}
-                                        data={episodes}
+                                        data={episodes.sort((a, b) => (parseInt(a.episode_number) - parseInt(b.episode_number)))}
                                         renderItem={({ item, index }) => {
                                             return (
                                                 <TouchableOpacity onPress={() => playEpisode(item.id)} style={{ marginHorizontal: scale(6) }} >
@@ -967,8 +966,8 @@ const PlayerScreen = (props) => {
                                                         <MaterialIcons name="play-arrow" color={colors.black} size={verticalScale(22)} />
                                                         <View>
                                                             <Text style={{
-                                                                color: colors.black, 
-                                                                fontSize: scaleFont(12), 
+                                                                color: colors.black,
+                                                                fontSize: scaleFont(12),
                                                                 fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>
                                                                 S{selectedId} E{item.episode_number}
                                                             </Text>

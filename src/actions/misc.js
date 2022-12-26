@@ -117,8 +117,6 @@ export const likesResponse = (response, type) => {
 
     return function (dispatch) {
         dispatch(like());
-        console.log("Can we refresh?")
-        console.log(refresh);
         if (refresh) {
             dispatch(initRefresh( type === 'movie'? 'movies': type));
         }

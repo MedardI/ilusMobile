@@ -30,6 +30,7 @@ const addSerie = (series, response) => {
 };
 
 const updateSeries = (state, action) => {
+  console.log(action.data);
   state.data = state.data.map(series => {
     if (series.genreId === action.data.genre){
       series.list = action.data.series;
@@ -74,6 +75,7 @@ const series = (state = initialState, action) => {
         all: series
       };
     case SERIES_DISCOVER_SUCCESS:
+      console.log(action.data);
       return {
         ...state,
         ...initialState,

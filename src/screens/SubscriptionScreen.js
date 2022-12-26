@@ -10,6 +10,7 @@ import {
     initPaymentMethods,
     initSubscription
 } from "../actions/misc"
+import { diffInDays } from '../api/helper';
 
 const SubscriptionScreen = (props) => {
 
@@ -59,6 +60,11 @@ const SubscriptionScreen = (props) => {
         return props.auth?.user?.subscription?.braintree_id === id;
     }
 
+    const getRemainingDays = () => {
+        let diff = diffInDays(new Date(), props.auth.user.period_end ? new Date(props.auth.user.period_end): null);
+        return diff ? diff : 0;
+    }
+    
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
             <SafeAreaView />
@@ -123,12 +129,24 @@ const SubscriptionScreen = (props) => {
                             </View>
                             {
                                 isCurrentSubscription(packages.plan_id) ?
-                                (<View>
+                                (<View style={{
+                                    display: 'flex',
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    justifyContent: "center"
+                                }}>
                                     <Text style={{
                                     color: colors.statementGreenColour,
                                     textAlign: "center",
+                                    alignSelf: "center",
                                     fontSize: scaleFont(12)
                                 }}>Votre abonnement actuel</Text>
+                                <Text
+                                style={{
+                                    marginLeft: 5,
+                                    fontSize: scaleFont(11),
+                                    color: getRemainingDays() > 3 ? colors.green : colors.primary_red
+                                }}>{`(${getRemainingDays()} jours restant`})</Text>
                                 </View>) : null
                             }
                         </TouchableOpacity>
