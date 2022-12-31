@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 // @react-native-community/netinfo
 import com.reactnativecommunity.netinfo.NetInfoPackage;
+// @sayem314/react-native-keep-awake
+import com.sayem.keepawake.KCKeepAwakePackage;
 // react-native-background-downloader
 import com.eko.RNBackgroundDownloaderPackage;
 // react-native-fast-image
@@ -82,6 +84,7 @@ public class PackageList {
       new MainReactPackage(mConfig),
       new AsyncStoragePackage(),
       new NetInfoPackage(),
+      new KCKeepAwakePackage(),
       new RNBackgroundDownloaderPackage(),
       new FastImageViewPackage(),
       new RNFSPackage(),

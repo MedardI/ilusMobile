@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { activateKeepAwake, deactivateKeepAwake} from "@sayem314/react-native-keep-awake";
 import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import AppHeader from '../components/AppHeader';
 import {colors, constants, fullHeight, fullWidth, scale, scaleFont, verticalScale} from '../utils';
@@ -37,10 +38,12 @@ const VideoPlayer = (props) => {
     const [playing, setPlaying] = useState(null);
     const [download, setdownload] = useState(false);
     const [fetching, setFetching] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [poster, setPoster] = useState(null);
     const [player, setPlayer] = useState(null);
     const [episode, setEpisode] = useState(null);
     const [hasPaid, setHasPaid] = useState();
+    const [currentTime, setCurrentTime] = useState(null);
     const seasoncount = 0;
     var seasonitem = [];
     for (let i = 0; i < seasoncount; i++) {
@@ -57,11 +60,13 @@ const VideoPlayer = (props) => {
             if (!data.downloaded){
                 initWatchMovie(data.id)
                     .then(response => {
+                        setCurrentTime(response.data.current_movie.current_movie);
                         setPoster(response.data.current_movie.poster);
                         if (response.data?.playlist?.playlist){
                             setPlaying(response.data?.playlist.playlist[0]);
                         }
                         setFetching(false);
+                        setLoading(true);
                     }).catch(() => {
                     setFetching(false);
                 });
@@ -70,6 +75,7 @@ const VideoPlayer = (props) => {
             if (!data.downloaded){
                 initWatchSerie(data.id, seriesData.episodeId)
                 .then(response => {
+                    setCurrentTime(response.data.current_episode.current_time);
                     if (response.data?.playlist?.playlist){
                         setPoster(response.data.current_episode.backdrop);
                         const episode = (response.data.current_season.filter(e => e.id === seriesData.episodeId) || [])[0];
@@ -83,6 +89,7 @@ const VideoPlayer = (props) => {
                         }
 
                         setFetching(false);
+                        setLoading(true);
                     }
                     setFetching(false);
                 }).catch(() => {
@@ -113,9 +120,10 @@ const VideoPlayer = (props) => {
     };
 
     const onPlayerReady = () => {
-        if (data.current_time){
-            player.seek(parseInt(data.current_time));
+        if (data.current_time || currentTime){
+            player.seek(parseInt(currentTime || data.current_time));
         }
+        setLoading(false);
     };
 
     const onProgress = (progress) => {
@@ -138,13 +146,18 @@ const VideoPlayer = (props) => {
             <StatusBar barStyle={"light-content"} backgroundColor={"black"} hidden={false} translucent={false}
             />
             {
-                fetching && !data.downloaded? (
+                (fetching && !data.downloaded) || loading? (
                     <View style={{
                         flex: 1,
                         alignSelf: "center",
                         alignItems: "center",
                         flexDirection: "row",
-                        height: fullHeight
+                        height: fullHeight,
+                        position: 'absolute',
+                        width: fullWidth,
+                        backgroundColor: 'rgba(0,0,0,.7)',
+                        justifyContent: "center",
+                        zIndex: 1000
                     }}>
                         <ActivityIndicator style={{
                             marginLeft: 15
@@ -161,8 +174,10 @@ const VideoPlayer = (props) => {
                                      fullscreenAutorotate={true}
                                      onLoad={onPlayerReady}
                                      onProgress={onProgress}
+                                     onFullscreenPlayerDidPresent={() => activateKeepAwake()}
+                                     onFullscreenPlayerDidDismiss={() => deactivateKeepAwake()}
                                      ref={ref => setPlayer(ref)}
-                                     progressUpdateInterval={60000}
+                                     progressUpdateInterval={20000}
                                      style={{ width: scale(360), height: verticalScale(200), }} />: null
                 }
                 {
@@ -239,7 +254,6 @@ const VideoPlayer = (props) => {
                             <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
 
                             <Text style={{ color: colors.white, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, marginHorizontal: scale(6) }}>{data.language}</Text>
-
 
                         </View>
 

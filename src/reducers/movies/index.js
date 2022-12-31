@@ -1,9 +1,11 @@
-import { act } from "react-test-renderer";
 import {
   MOVIE, MOVIE_FAIL, MOVIE_SUCCESS,
   MOVIES_DISCOVER,
   MOVIES_DISCOVER_FAIL,
-  MOVIES_DISCOVER_SUCCESS, MOVIES_SUCCESS, POST_LIKE_MOVIE_SUCCESS,
+  MOVIES_DISCOVER_SUCCESS,
+  MOVIES_SUCCESS,
+  POST_LIKE_MOVIE_SUCCESS,
+  MOVIE_RECENT_SUCCESS,
 } from "../../constants";
 
 let initialState = {
@@ -74,6 +76,42 @@ const addLike = (state, action) => {
   return state;
 }
 
+const updateRecent = (state, action, all) => {
+    let updated = false;
+    state.recent = state.recent.map(movie => {
+      if (movie.id === action.data.id){
+        updated = true;
+        movie.current_time = action.data.current;
+        movie.duration_time = action.data.duration;
+      }
+      return movie;
+    })
+  
+    if (!updated){
+      const found = all.find(m => m.movie.id === action.data.id);
+      if (found){
+        const movie = found.movie;
+        movie.current_time = action.data.current;
+        movie.duration_time = action.data.duration;
+        state.recent.unshift(movie);
+      }
+    }
+
+    return state;
+};
+
+const updateMovieRecent = (state, action) => {
+  state.list = state.list.map(movie => {
+    if (movie.movie.id === action.data.id){
+      movie.movie.current_time = action.data.current;
+      movie.movie.duration_time = action.data.duration;
+    }
+    return movie;
+  })
+
+  return state;
+}
+
 const movies = (state = initialState, action) => {
   const movies = state.all;
   switch (action.type) {
@@ -135,6 +173,12 @@ const movies = (state = initialState, action) => {
         ...state,
         discover: addLike(state.discover, action),
         all: addLikeToMovie(state.all, action)
+      };
+    case MOVIE_RECENT_SUCCESS:
+      return {
+        ...state,
+        discover: updateRecent(state.discover, action, state.all.list),
+        all: updateMovieRecent(state.all, action)
       }
   }
 

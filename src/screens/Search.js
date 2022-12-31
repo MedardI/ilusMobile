@@ -8,7 +8,6 @@ import Env from "../env";
 import { initSearch } from '../actions/misc';
 
 const RenderEmptyComponent = (searchTerm) => {
-    console.log(searchTerm);
     return (
         <View style={{
             flex: 1,
@@ -76,7 +75,7 @@ const Search = (props) => {
                 <SafeAreaView />
                 <StatusBar barStyle={"light-content"} backgroundColor={colors.black} hidden={false} translucent={false}
                 />
-                <AppHeader heading={'Search'} navigation={() => props.navigation.goBack()} showicon={true} />
+                <AppHeader heading={'Recherche'} navigation={() => props.navigation.goBack()} showicon={true} />
                 <Text
                     style={{
                         color: colors.white,

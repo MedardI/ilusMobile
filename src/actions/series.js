@@ -13,7 +13,7 @@ import {
     SERIE,
     SERIE_URL,
     SERIE_WATCH_URL,
-    SERIES_RECENT_URL, MOVIES_URL, MOVIES_SUCCESS, MOVIES_FAIL, SERIES_SUCCESS, SERIES_FAIL, SERIES_URL
+    SERIES_RECENT_URL, MOVIES_URL, MOVIES_SUCCESS, MOVIES_FAIL, SERIES_SUCCESS, SERIES_FAIL, SERIES_URL, SERIES_RECENT_SUCCESS
 } from "../constants";
 
 import API from '../api';
@@ -154,7 +154,8 @@ export const initUpdateRecent = (id, episodeId, duration, current, localId) => {
                 dispatch(serieRecentResponse({
                     id,
                     episodeId,
-                    current
+                    current,
+                    duration
                 }));
             }
         }).catch((error) => {
@@ -170,7 +171,7 @@ export const initUpdateRecent = (id, episodeId, duration, current, localId) => {
  */
 export const serieRecentResponse = (data) => {
     return {
-        type: SERIES_RECENT_URL,
+        type: SERIES_RECENT_SUCCESS,
         data
     }
 };

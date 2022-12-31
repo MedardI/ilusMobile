@@ -149,7 +149,8 @@ export const initUpdateRecent = (id, duration, current, localId) => {
             if (response.status){
                 dispatch(movieRecentResponse({
                     id,
-                    current
+                    current,
+                    duration
                 }));
             }
         }).catch((error) => {

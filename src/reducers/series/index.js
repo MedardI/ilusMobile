@@ -1,8 +1,7 @@
 import {
-  MOVIE, MOVIE_FAIL, MOVIE_SUCCESS, MOVIES_SUCCESS, SERIE, SERIE_FAIL, SERIE_SUCCESS,
-  SERIES_DISCOVER, SERIES_DISCOVER_FAIL, SERIES_DISCOVER_SUCCESS, SERIES_SUCCESS,
+  SERIE, SERIE_FAIL, SERIE_SUCCESS,
+  SERIES_DISCOVER, SERIES_DISCOVER_FAIL, SERIES_DISCOVER_SUCCESS, SERIES_SUCCESS, SERIES_RECENT_SUCCESS,
 } from "../../constants";
-import movies from "../movies";
 
 let initialState = {
   fetching: false,
@@ -30,7 +29,6 @@ const addSerie = (series, response) => {
 };
 
 const updateSeries = (state, action) => {
-  console.log(action.data);
   state.data = state.data.map(series => {
     if (series.genreId === action.data.genre){
       series.list = action.data.series;
@@ -40,6 +38,42 @@ const updateSeries = (state, action) => {
 
   return state;
 };
+
+const updateRecent = (state, action, all) => {
+  const updated = false;
+  state.recent = state.recent.map(movie => {
+    if (movie.id === action.data.id){
+      updated = true;
+      movie.current_time = action.data.current;
+      movie.duration_time = action.data.duration;
+    }
+    return movie;
+  })
+
+  if (!updated){
+    const found = all.find(m => m.movie.id === action.data.id);
+    if (found){
+      const movie = found.movie;
+      movie.current_time = action.data.current;
+      movie.duration_time = action.data.duration;
+      state.recent.unshift(movie);
+    }
+  }
+
+  return state;
+};
+
+const updateSerieRecent = (state, action) => {
+  state.list = state.list.map(movie => {
+    if (movie.movie.id === action.data.id){
+      movie.movie.current_time = action.data.current;
+      movie.movie.duration_time = action.data.duration;
+    }
+  return movie;
+})
+
+return state;
+}
 
 const series = (state = initialState, action) => {
   const series = state.all;
@@ -75,7 +109,6 @@ const series = (state = initialState, action) => {
         all: series
       };
     case SERIES_DISCOVER_SUCCESS:
-      console.log(action.data);
       return {
         ...state,
         ...initialState,
@@ -95,6 +128,12 @@ const series = (state = initialState, action) => {
         ...state,
         discover: updateSeries(state.discover, action),
       };
+    // case SERIES_RECENT_SUCCESS:
+    //   return {
+    //     ...state,
+    //     discover: updateRecent(state.discover, action, state.all.list),
+    //     all: updateSerieRecent(state.all, action)
+    //   }
   }
 
   return state;

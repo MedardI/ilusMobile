@@ -40,6 +40,8 @@ export const SERIES= "SERIES";
 export const SERIES_FAIL = "SERIES_FAIL";
 export const SERIES_SUCCESS = "SERIES_SUCCESS";
 
+export const SERIES_RECENT_SUCCESS = "SERIES_RECENT_SUCCESS";
+
 //Kids
 export const KIDS_DISCOVER = "KIDS_DISCOVER";
 export const KIDS_DISCOVER_FAIL = "KIDS_DISCOVER_FAIL";
