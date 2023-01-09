@@ -93,6 +93,7 @@ const updateRecent = (state, action, all) => {
         const movie = found.movie;
         movie.current_time = action.data.current;
         movie.duration_time = action.data.duration;
+        movie.type = "movie";
         state.recent.unshift(movie);
       }
     }

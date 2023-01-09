@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { activateKeepAwake, deactivateKeepAwake} from "@sayem314/react-native-keep-awake";
 import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import AppHeader from '../components/AppHeader';
 import {colors, constants, fullHeight, fullWidth, scale, scaleFont, verticalScale} from '../utils';
@@ -143,7 +142,7 @@ const VideoPlayer = (props) => {
     return (
         <View style={{ flex: 1, backgroundColor: colors.black }}>
             <SafeAreaView />
-            <StatusBar barStyle={"light-content"} backgroundColor={"black"} hidden={false} translucent={false}
+            <StatusBar barStyle={"dark-content"} backgroundColor={"black"} hidden={true} translucent={false}
             />
             {
                 (fetching && !data.downloaded) || loading? (
@@ -165,20 +164,21 @@ const VideoPlayer = (props) => {
                     </View>
                 ): null
             }
-            <View style={{}} >
+            <View style={{
+                flex: 1,
+                justifyContent: "center"
+            }} >
                 {
                     (playing || data.downloaded) && hasPaid ? <Video source={{ uri: getVideoURL() }}   // Can be a URL or a local file.
                                      controls={true}
                                      fullscreenOrientation={"landscape"}
-                                     fullscreen={false}
+                                     fullscreen={true}
                                      fullscreenAutorotate={true}
                                      onLoad={onPlayerReady}
                                      onProgress={onProgress}
-                                     onFullscreenPlayerDidPresent={() => activateKeepAwake()}
-                                     onFullscreenPlayerDidDismiss={() => deactivateKeepAwake()}
                                      ref={ref => setPlayer(ref)}
                                      progressUpdateInterval={20000}
-                                     style={{ width: scale(360), height: verticalScale(200), }} />: null
+                                     style={{ flex: 1}} />: null
                 }
                 {
                      (playing || data.downloaded) && !hasPaid ? (<View>
@@ -229,50 +229,9 @@ const VideoPlayer = (props) => {
                      </View>): null
                 }
             </View>
-            <View style={{ position: 'absolute', zIndex: 1, top: verticalScale(40) }}>
+            <View style={{ position: 'absolute', zIndex: 1001, top: verticalScale(40) }}>
                 <AppHeader heading="" navigation={() => props.navigation.goBack()} showicon={true} />
             </View>
-
-            <View style={{ alignSelf: 'center', flex: 1 }}>
-                <ScrollView overScrollMode='never' showsVerticalScrollIndicator={false} style={{}}>
-
-                    <View style={{ width: scale(340), justifyContent: 'center', alignSelf: 'center' }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: verticalScale(5) }}>
-                            <Text style={{ color: colors.white, fontSize: scaleFont(22), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>{data.name}</Text>
-                            {/* <TouchableOpacity onPress={() => downloaditem()} style={{ justifyContent: 'center', alignItems: 'center', marginRight: scale(10) }} >
-                                <MaterialIcons name="file-download" color={download ? colors.green : colors.greyColour} size={verticalScale(26)} />
-                            </TouchableOpacity> */}
-                        </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                            <Text style={{ color: colors.white, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, marginRight: scale(6) }}>{data.duration}</Text>
-                            <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
-
-                            <Text style={{ color: colors.white, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, marginHorizontal: scale(6) }}>{data.genre}</Text>
-                            <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
-
-                            <Text style={{ color: colors.white, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, marginHorizontal: scale(6) }}>{data.year}</Text>
-                            <MaterialIcons name="stop-circle" color={colors.green} size={verticalScale(8)} />
-
-                            <Text style={{ color: colors.white, fontSize: scaleFont(12), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD, marginHorizontal: scale(6) }}>{data.language}</Text>
-
-                        </View>
-
-                    </View>
-
-
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: scale(20), marginTop: verticalScale(10) }}>
-
-                    </View>
-
-                    <View style={{ marginHorizontal: scale(20), marginTop: verticalScale(10) }}>
-                        <Text style={{ color: colors.aeps_borderColor, fontSize: scaleFont(14), fontFamily: constants.OPENSANS_FONT_SEMI_BOLD }}>
-                            {data.overview}
-                        </Text>
-                    </View>
-
-                </ScrollView>
-            </View>
-
         </View>
     );
 };
